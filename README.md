@@ -29,11 +29,11 @@ Assemblies are strong-named with the Refrakt key (`refrakt.snk`, PublicKeyToken 
 
 ### Container-specific packages
 
-Each supported IoC container has its own package assisting in the setup and usage of that container together with Refrakt. The assembly is named using this convention: Refrakt.*Container.Platform*.dll, e.g. **Refrakt.Unity.Wpf.dll**. Be sure to install the package for the Container and the Platform of your choice.
+Each supported IoC container has its own package assisting in the setup and usage of that container together with Refrakt. The assembly is named using this convention: Refrakt.*Container.Platform*.dll, e.g. **Refrakt.DryIoc.Wpf.dll**. Be sure to install the package for the Container and the Platform of your choice.
 
-| Platform | DryIoc | Unity |
-| -------- | ------ | ----- |
-| WPF | Refrakt.DryIoc | Refrakt.Unity |
+| Platform | DryIoc |
+| -------- | ------ |
+| WPF | Refrakt.DryIoc |
 
 ## Building
 

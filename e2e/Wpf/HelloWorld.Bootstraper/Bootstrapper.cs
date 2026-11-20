@@ -1,10 +1,9 @@
 ﻿using HelloWorld.Modules.ModuleA;
 using HelloWorld.Views;
+using Refrakt.DryIoc;
 using Refrakt.Ioc;
 using Refrakt.Modularity;
-using Refrakt.Unity;
 using System.Windows;
-using Unity;
 
 namespace HelloWorld
 {

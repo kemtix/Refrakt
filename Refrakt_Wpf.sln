@@ -17,15 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refrakt.Wpf", "src\Wpf\Refr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refrakt.DryIoc.Wpf", "src\Wpf\Refrakt.DryIoc.Wpf\Refrakt.DryIoc.Wpf.csproj", "{A2976E8C-589A-47C7-B81D-D59CBCED2E0B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refrakt.Unity.Wpf", "src\Wpf\Refrakt.Unity.Wpf\Refrakt.Unity.Wpf.csproj", "{2F184285-B860-4C68-AAF7-73AF6B2F98D8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Wpf", "Wpf", "{414633C4-2FB9-4A81-8071-832C33C027BC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refrakt.Wpf.Tests", "tests\Wpf\Refrakt.Wpf.Tests\Refrakt.Wpf.Tests.csproj", "{226A223E-8239-4986-A3BD-3730E457EAB2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refrakt.DryIoc.Wpf.Tests", "tests\Wpf\Refrakt.DryIoc.Wpf.Tests\Refrakt.DryIoc.Wpf.Tests.csproj", "{A60CF7B0-56AD-4568-9720-E30EE5855149}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refrakt.Unity.Wpf.Tests", "tests\Wpf\Refrakt.Unity.Wpf.Tests\Refrakt.Unity.Wpf.Tests.csproj", "{FD11FA19-6A06-471D-8471-94C1153104CD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refrakt.IocContainer.Wpf.Tests.Support", "tests\Wpf\Refrakt.IocContainer.Wpf.Tests.Support\Refrakt.IocContainer.Wpf.Tests.Support.csproj", "{4039BC28-15D4-4EE1-82D8-80BD4CC61C50}"
 EndProject
@@ -35,17 +31,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Containers", "Containers", 
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Refrakt.DryIoc.Shared", "src\Containers\Refrakt.DryIoc.Shared\Refrakt.DryIoc.Shared.shproj", "{6E7EC81D-DA39-4C4F-A898-0148558C34F4}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Refrakt.Unity.Shared", "src\Containers\Refrakt.Unity.Shared\Refrakt.Unity.Shared.shproj", "{D66336A6-07E5-401A-A710-DAEDD6975D59}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\Containers\Refrakt.Unity.Shared\Refrakt.Unity.Shared.projitems*{2f184285-b860-4c68-aaf7-73af6b2f98d8}*SharedItemsImports = 5
 		src\Containers\Refrakt.DryIoc.Shared\Refrakt.DryIoc.Shared.projitems*{6e7ec81d-da39-4c4f-a898-0148558c34f4}*SharedItemsImports = 13
 		src\Containers\Refrakt.DryIoc.Shared\Refrakt.DryIoc.Shared.projitems*{a2976e8c-589a-47c7-b81d-d59cbced2e0b}*SharedItemsImports = 5
 		tests\Wpf\Refrakt.Container.Wpf.Shared\Refrakt.Container.Wpf.Shared.projitems*{a60cf7b0-56ad-4568-9720-e30ee5855149}*SharedItemsImports = 5
 		tests\Wpf\Refrakt.Container.Wpf.Shared\Refrakt.Container.Wpf.Shared.projitems*{bd42a7d6-a84d-4d27-9c28-7f6a2ec477f1}*SharedItemsImports = 13
-		src\Containers\Refrakt.Unity.Shared\Refrakt.Unity.Shared.projitems*{d66336a6-07e5-401a-a710-daedd6975d59}*SharedItemsImports = 13
-		tests\Wpf\Refrakt.Container.Wpf.Shared\Refrakt.Container.Wpf.Shared.projitems*{fd11fa19-6a06-471d-8471-94c1153104cd}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,18 +95,6 @@ Global
 		{A2976E8C-589A-47C7-B81D-D59CBCED2E0B}.Release|x64.Build.0 = Release|Any CPU
 		{A2976E8C-589A-47C7-B81D-D59CBCED2E0B}.Release|x86.ActiveCfg = Release|Any CPU
 		{A2976E8C-589A-47C7-B81D-D59CBCED2E0B}.Release|x86.Build.0 = Release|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Debug|x64.Build.0 = Debug|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Debug|x86.Build.0 = Debug|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Release|x64.ActiveCfg = Release|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Release|x64.Build.0 = Release|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Release|x86.ActiveCfg = Release|Any CPU
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8}.Release|x86.Build.0 = Release|Any CPU
 		{226A223E-8239-4986-A3BD-3730E457EAB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{226A223E-8239-4986-A3BD-3730E457EAB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{226A223E-8239-4986-A3BD-3730E457EAB2}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -140,18 +119,6 @@ Global
 		{A60CF7B0-56AD-4568-9720-E30EE5855149}.Release|x64.Build.0 = Release|Any CPU
 		{A60CF7B0-56AD-4568-9720-E30EE5855149}.Release|x86.ActiveCfg = Release|Any CPU
 		{A60CF7B0-56AD-4568-9720-E30EE5855149}.Release|x86.Build.0 = Release|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Debug|x64.Build.0 = Debug|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Debug|x86.Build.0 = Debug|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Release|x64.ActiveCfg = Release|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Release|x64.Build.0 = Release|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Release|x86.ActiveCfg = Release|Any CPU
-		{FD11FA19-6A06-471D-8471-94C1153104CD}.Release|x86.Build.0 = Release|Any CPU
 		{4039BC28-15D4-4EE1-82D8-80BD4CC61C50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4039BC28-15D4-4EE1-82D8-80BD4CC61C50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4039BC28-15D4-4EE1-82D8-80BD4CC61C50}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -174,16 +141,13 @@ Global
 		{0CEBA764-DF92-4A2A-8F0B-EF2C32BC6514} = {0DF20AD9-0A3F-4B61-BC8A-2D6DED59A7D2}
 		{8DC0C660-7F42-40C4-8DE0-BA2A078C1202} = {0CEBA764-DF92-4A2A-8F0B-EF2C32BC6514}
 		{A2976E8C-589A-47C7-B81D-D59CBCED2E0B} = {0CEBA764-DF92-4A2A-8F0B-EF2C32BC6514}
-		{2F184285-B860-4C68-AAF7-73AF6B2F98D8} = {0CEBA764-DF92-4A2A-8F0B-EF2C32BC6514}
 		{414633C4-2FB9-4A81-8071-832C33C027BC} = {F1F2E587-3A5D-4A76-B0BA-A04791628A9C}
 		{226A223E-8239-4986-A3BD-3730E457EAB2} = {414633C4-2FB9-4A81-8071-832C33C027BC}
 		{A60CF7B0-56AD-4568-9720-E30EE5855149} = {414633C4-2FB9-4A81-8071-832C33C027BC}
-		{FD11FA19-6A06-471D-8471-94C1153104CD} = {414633C4-2FB9-4A81-8071-832C33C027BC}
 		{4039BC28-15D4-4EE1-82D8-80BD4CC61C50} = {414633C4-2FB9-4A81-8071-832C33C027BC}
 		{BD42A7D6-A84D-4D27-9C28-7F6A2EC477F1} = {414633C4-2FB9-4A81-8071-832C33C027BC}
 		{3CD6B945-4E76-4DC7-A68A-972C36ADA718} = {0DF20AD9-0A3F-4B61-BC8A-2D6DED59A7D2}
 		{6E7EC81D-DA39-4C4F-A898-0148558C34F4} = {3CD6B945-4E76-4DC7-A68A-972C36ADA718}
-		{D66336A6-07E5-401A-A710-DAEDD6975D59} = {3CD6B945-4E76-4DC7-A68A-972C36ADA718}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {544BBD3D-C3AA-405A-9832-122679F8AD05}

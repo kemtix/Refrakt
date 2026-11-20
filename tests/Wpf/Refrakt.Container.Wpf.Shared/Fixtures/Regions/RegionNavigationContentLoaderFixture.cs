@@ -29,7 +29,7 @@ namespace Refrakt.Container.Wpf.Tests.Regions
             _container.RegisterForNavigation<MockView>();
             //_container.RegisterType<object, MockView>("MockView");
 
-            // We cannot access the UnityRegionNavigationContentLoader directly so we need to call its
+            // We cannot access the RegionNavigationContentLoader directly so we need to call its
             // GetCandidatesFromRegion method through a navigation request.
             IRegion testRegion = new Region();
 

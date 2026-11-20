@@ -523,7 +523,6 @@ namespace Refrakt.Ioc.Tests
             Assert.NotSame(service, Setup.Container.Resolve<Lazy<IServiceA>>().Value);
         }
 
-#if !UNITY
         [Fact]
         public void Register_RegistersIEnumerable()
         {
@@ -535,7 +534,6 @@ namespace Refrakt.Ioc.Tests
             Assert.Single(services);
             Assert.IsType<ServiceA>(services.First());
         }
-#endif
 
         [Fact]
         public void Register_LastInFirstOut()
@@ -549,7 +547,6 @@ namespace Refrakt.Ioc.Tests
             Assert.NotSame(service, Setup.Container.Resolve<IServiceA>());
         }
 
-#if !UNITY
         [Theory]
         [InlineData(0, typeof(ServiceA))]
         [InlineData(1, typeof(CompositeService))]
@@ -565,7 +562,6 @@ namespace Refrakt.Ioc.Tests
             Assert.IsType(type, services.ElementAt(index));
         }
 
-#endif
 
         [Fact]
         public void RegisterSingleton_RegistersSingletonService()
@@ -612,7 +608,6 @@ namespace Refrakt.Ioc.Tests
             Assert.Same(service, Setup.Container.Resolve<Lazy<IServiceA>>().Value);
         }
 
-#if !UNITY
 
         [Fact]
         public void RegisterSingleton_RegistersIEnumerable()
@@ -626,7 +621,6 @@ namespace Refrakt.Ioc.Tests
             Assert.IsType<ServiceA>(services.First());
         }
 
-#endif
 
         [Fact]
         public void RegisterInstance_RegistersSingletonService()
@@ -653,7 +647,6 @@ namespace Refrakt.Ioc.Tests
             Assert.Same(service, Setup.Container.Resolve<IServiceA>());
         }
 
-#if !UNITY
         [Theory]
         [InlineData(0, typeof(ServiceA))]
         [InlineData(1, typeof(CompositeService))]
@@ -669,7 +662,6 @@ namespace Refrakt.Ioc.Tests
             Assert.IsType(type, services.ElementAt(index));
         }
 
-#endif
 
         [Fact]
         public void RegisterInstance_RegistersFunc()
@@ -707,7 +699,6 @@ namespace Refrakt.Ioc.Tests
 
 
 
-#if !UNITY
 
         [Fact]
         public void RegisterInstance_RegistersIEnumerable()
@@ -722,6 +713,5 @@ namespace Refrakt.Ioc.Tests
             Assert.IsType<ServiceA>(services.First());
         }
 
-#endif
     }
 }

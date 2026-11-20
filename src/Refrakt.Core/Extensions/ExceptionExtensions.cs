@@ -5,7 +5,7 @@ namespace System
     /// <summary>
     /// Class that provides extension methods for the Exception class. These extension methods provide
     /// a mechanism for developers to get more easily to the root cause of an exception, especially in combination with 
-    /// DI-containers such as Unity. 
+    /// DI containers such as DryIoc.
     /// </summary>
     public static class ExceptionExtensions
     {
