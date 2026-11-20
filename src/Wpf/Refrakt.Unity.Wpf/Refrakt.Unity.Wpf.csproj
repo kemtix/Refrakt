@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;net47;netcoreapp3.1;net5.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Refrakt.Unity</RootNamespace>
+    <PackageId>Refrakt.Unity</PackageId>
+    <!--<Summary>Unity extensions for Refrakt.</Summary>-->
+    <Description>Use these extensions to build Refrakt applications based on Unity.</Description>
+    <PackageTags>refrakt;unity;mvvm;wpf;xaml</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Unity.Container" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Refrakt.Wpf\Refrakt.Wpf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
+    <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+    <Compile Update="Properties\Settings.Designer.cs" DesignTimeSharedInput="True" AutoGen="True" DependentUpon="Settings.settings" />
+    <None Update="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" LastGenOutput="Settings.Designer.cs" />
+  </ItemGroup>
+
+  <Import Project="..\..\Containers\Refrakt.Unity.Shared\Refrakt.Unity.Shared.projitems" Label="Shared" />
+
+</Project>

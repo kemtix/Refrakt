@@ -1,0 +1,105 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - devOps
+  paths:
+    include:
+    - build/*
+    - e2e/*
+    - src/*
+    - tests/*
+
+pr:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - build/*
+    - e2e/*
+    - src/*
+    - tests/*
+
+name: $(Build.BuildId)
+
+variables:
+- name: VMImage
+  value: windows-latest
+- name: LinuxImage
+  value: ubuntu-latest
+- name: BuildConfiguration
+  value: Release
+- name: BuildPlatform
+  value: Any CPU
+- group: SignClient
+
+stages:
+- stage: buildTest
+  displayName: Build & Test
+  jobs:
+  - template: jobs/refrakt-core.yml
+
+  - template: jobs/refrakt-wpf.yml
+
+- stage: e2e
+  displayName: End to End
+  jobs:
+  - template: jobs/e2e-wpf.yml
+
+- stage: buildPackage
+  displayName: Build Refrakt Library
+  jobs:
+  - template: jobs/refrakt-lib.yml
+
+- stage: nugetDeploy
+  displayName: NuGet.org Deploy
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/rel'), eq(variables['system.pullrequest.isfork'], false))
+  jobs:
+  - deployment: NuGet
+    displayName: NuGet.org
+    environment: NuGet
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+            displayName: Get Build Resources
+
+          - powershell: build/Process-Artifacts.ps1
+            displayName: Process Artifacts for Release
+
+          - task: ArchiveFiles@2
+            displayName: 'Archive Assembly Artifacts'
+            inputs:
+              rootFolderOrFile: '$(DLLArtifactsPath)'
+              archiveFile: '$(DLLArtifactsZip)'
+
+          - task: GithubRelease@0
+            displayName: 'Create GitHub Release'
+            inputs:
+              gitHubConnection: 'RefraktLib'
+              title: '$(ReleaseDisplayName)'
+              tagSource: manual
+              tag: 'v$(VersionName)'
+              isPreRelease: $(IS_PREVIEW)
+              assets: |
+               $(DLLArtifactsZip)
+               $(Pipeline.Workspace)/**/*.nupkg
+               $(Pipeline.Workspace)/**/*.snupkg
+              isDraft: true
+              addChangeLog: true
+
+          - task: NuGetToolInstaller@1
+            displayName: Use latest NuGet
+            inputs:
+              checkLatest: true
+
+          - task: NuGetCommand@2
+            displayName: NuGet Push
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg;$(Pipeline.Workspace)/**/*.snupkg'
+              nuGetFeedType: external
+              publishFeedCredentials: 'NuGet.org'

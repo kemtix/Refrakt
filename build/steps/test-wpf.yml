@@ -1,0 +1,28 @@
+parameters:
+  publishTestResults: false
+
+steps:
+- powershell: |
+   dotnet test $(System.DefaultWorkingDirectory)\tests\Wpf\Refrakt.Wpf.Tests\Refrakt.Wpf.Tests.csproj --configuration $env:BuildConfiguration --logger trx --no-build --collect "Code Coverage"
+   dotnet test $(System.DefaultWorkingDirectory)\tests\Wpf\Refrakt.DryIoc.Wpf.Tests\Refrakt.DryIoc.Wpf.Tests.csproj --configuration $env:BuildConfiguration --logger trx --no-build --collect "Code Coverage"
+   dotnet test $(System.DefaultWorkingDirectory)\tests\Wpf\Refrakt.Unity.Wpf.Tests\Refrakt.Unity.Wpf.Tests.csproj --configuration $env:BuildConfiguration --logger trx --no-build --collect "Code Coverage"
+
+  displayName: Test Refrakt.WPF
+
+- template: publish-vstest-results.yml
+  parameters:
+    enabled: ${{ parameters.publishTestResults }}
+    testRunTitle: Refrakt.WPF
+    testResultsFiles: '$(System.DefaultWorkingDirectory)/tests/Wpf/Refrakt.Wpf.Tests/TestResults/*.trx'
+
+- template: publish-vstest-results.yml
+  parameters:
+    enabled: ${{ parameters.publishTestResults }}
+    testRunTitle: Refrakt.DryIoc.WPF
+    testResultsFiles: '$(System.DefaultWorkingDirectory)/tests/Wpf/Refrakt.DryIoc.Wpf.Tests/TestResults/*.trx'
+
+- template: publish-vstest-results.yml
+  parameters:
+    enabled: ${{ parameters.publishTestResults }}
+    testRunTitle: Refrakt.Unity.WPF
+    testResultsFiles: '$(System.DefaultWorkingDirectory)/tests/Wpf/Refrakt.Unity.Wpf.Tests/TestResults/*.trx'

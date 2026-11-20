@@ -1,0 +1,28 @@
+<Project>
+  <Import Project="..\Directory.Build.props" />
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <IsPackable Condition=" '$(IsCoreProject)' ">!$(DisableCorePublish)</IsPackable>
+    <IsPackable Condition=" '$(IsWpfProject)' ">!$(DisableWpfPublish)</IsPackable>
+    <ContinuousIntegrationBuild Condition="'$(BUILD_BUILDID)' != ''">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>$(IsPackable)</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" $(IsPackable) ">
+    <None Include="$(RefraktPackageIcon)"
+          Visible="False"
+          Pack="True"
+          PackagePath="" />
+    <None Include="$(RefraktLicenseFile)"
+          Visible="False"
+          Pack="True"
+          PackagePath="" />
+    <SourceRoot Include="$(NuGetPackageRoot)"
+                Condition="'$(NuGetPackageRoot)' != ''" />
+  </ItemGroup>
+</Project>

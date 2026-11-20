@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Refrakt</RootNamespace>
+    <TargetFrameworks>net461;net47;netcoreapp3.1;net5.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <!--<Summary>Refrakt libraries related to user interface composition, regions, and modularity for WPF.</Summary>-->
+    <Description>Refrakt provides an implementation of a collection of design patterns that are helpful in writing well structured, maintainable, and testable XAML applications, including MVVM, dependency injection, commanding, event aggregation, and more.
+
+Refrakt.Wpf helps you more easily design and build rich, flexible, and easy to maintain Windows Presentation Foundation (WPF) desktop applications. This library provides user interface composition as well as modularity support.</Description>
+    <PackageTags>refrakt;mvvm;xaml;wpf</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Services\Dialogs\DialogWindow.xaml" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net4')) ">
+    <Compile Remove="**\*.netcore.cs" />
+    <None Include="**\*.netcore.cs" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('netcore')) OR $(TargetFramework.StartsWith('net5'))">
+    <Compile Remove="**\*.net45.cs" />
+    <None Include="**\*.net45.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Refrakt.Core\Refrakt.Core.csproj" />
+  </ItemGroup>
+
+</Project>

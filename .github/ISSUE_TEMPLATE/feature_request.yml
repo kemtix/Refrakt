@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest an idea for Refrakt
+title: "[Enhancement] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A brief summary of your proposal. Two to three sentences is best.
+    validations:
+      required: true
+  - type: textarea
+    id: api-changes
+    attributes:
+      label: API Changes
+      description: |
+        List the API changes, additions and removals your proposal requires. Names are placeholders; the concepts matter most.
+        Include example usage code if possible.
+      render: csharp
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Intended Use Case
+      description: A detailed example of where your proposal would be used and for what purpose.
+    validations:
+      required: true

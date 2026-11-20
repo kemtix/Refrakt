@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;net462</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Refrakt.Core\Refrakt.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Wpf\Refrakt.Wpf\Refrakt.Wpf.csproj" />
+  </ItemGroup>
+
+</Project>

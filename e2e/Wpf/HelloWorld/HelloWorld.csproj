@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworks>netcoreapp3.1;net462</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>HelloWorld</RootNamespace>
+    <AssemblyName>HelloWorld</AssemblyName>
+    <ApplicationIcon>refrakt-sandbox.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Page Remove="ModuleCatalog.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Refrakt.Core\Refrakt.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Wpf\Refrakt.DryIoc.Wpf\Refrakt.DryIoc.Wpf.csproj" />
+    <ProjectReference Include="..\..\..\src\Wpf\Refrakt.Wpf\Refrakt.Wpf.csproj" />
+    <ProjectReference Include="..\HelloWorld.Core\HelloWorld.Core.csproj" />
+    <ProjectReference Include="..\Modules\HelloWorld.Modules.ModuleA\HelloWorld.Modules.ModuleA.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="ModuleCatalog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Resource>
+  </ItemGroup>
+
+</Project>

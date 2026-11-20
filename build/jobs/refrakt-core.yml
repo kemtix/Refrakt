@@ -1,0 +1,18 @@
+jobs:
+- job: refraktCore
+  displayName: Refrakt.Core
+  pool:
+    vmImage: $(VMImage)
+    demands:
+    - MSBuild
+  workspace:
+    clean: all
+  steps:
+  - template: ../steps/build.yml
+    parameters:
+      solution: Refrakt_Core.sln
+      solutionName: Refrakt.Core
+
+  - template: ../steps/test-core.yml
+    parameters:
+      publishTestResults: true
