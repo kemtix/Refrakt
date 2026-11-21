@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using Moq;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Refrakt.Ioc;
 using Refrakt.Regions;
 using Xunit;
@@ -26,12 +27,11 @@ namespace Refrakt.Wpf.Tests.Regions
             RegionManager regionManager = new RegionManager();
             regionManager.Regions.Add(regionName, region);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            var container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            var container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -62,12 +62,11 @@ namespace Refrakt.Wpf.Tests.Regions
             RegionManager regionManager = new RegionManager();
             regionManager.Regions.Add(regionName, region);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -96,16 +95,15 @@ namespace Refrakt.Wpf.Tests.Regions
 
             string otherType = "OtherType";
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
-            IContainerExtension container = containerMock.Object;
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            Mock<IRegionNavigationContentLoader> targetHandlerMock = new Mock<IRegionNavigationContentLoader>();
-            targetHandlerMock.Setup(th => th.LoadContent(It.IsAny<IRegion>(), It.IsAny<NavigationContext>())).Throws<ArgumentException>();
+            IRegionNavigationContentLoader targetHandler = Substitute.For<IRegionNavigationContentLoader>();
+            targetHandler.LoadContent(Arg.Any<IRegion>(), Arg.Any<NavigationContext>()).Throws<ArgumentException>();
 
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
-            RegionNavigationService target = new RegionNavigationService(container, targetHandlerMock.Object, journal)
+            RegionNavigationService target = new RegionNavigationService(container, targetHandler, journal)
             {
                 Region = region
             };
@@ -131,12 +129,11 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             IRegion region = new Region();
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -159,19 +156,17 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            var viewMock = new Mock<INavigationAware>();
-            viewMock.Setup(ina => ina.IsNavigationTarget(It.IsAny<NavigationContext>())).Returns(true);
-            var view = viewMock.Object;
+            var view = Substitute.For<INavigationAware>();
+            view.IsNavigationTarget(Arg.Any<NavigationContext>()).Returns(true);
             region.Add(view);
 
             var navigationUri = new Uri(view.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -182,7 +177,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { });
 
             // Verify
-            viewMock.Verify(v => v.OnNavigatedTo(It.Is<NavigationContext>(nc => nc.Uri == navigationUri && nc.NavigationService == target)));
+            view.Received().OnNavigatedTo(Arg.Is<NavigationContext>(nc => nc.Uri == navigationUri && nc.NavigationService == target));
         }
 
         [StaFact]
@@ -191,22 +186,21 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            Mock<FrameworkElement> mockFrameworkElement = new Mock<FrameworkElement>();
-            Mock<INavigationAware> mockINavigationAwareDataContext = new Mock<INavigationAware>();
-            mockINavigationAwareDataContext.Setup(ina => ina.IsNavigationTarget(It.IsAny<NavigationContext>())).Returns(true);
-            mockFrameworkElement.Object.DataContext = mockINavigationAwareDataContext.Object;
+            FrameworkElement frameworkElement = Substitute.For<FrameworkElement>();
+            INavigationAware navigationAwareDataContext = Substitute.For<INavigationAware>();
+            navigationAwareDataContext.IsNavigationTarget(Arg.Any<NavigationContext>()).Returns(true);
+            frameworkElement.DataContext = navigationAwareDataContext;
 
-            var view = mockFrameworkElement.Object;
+            var view = frameworkElement;
             region.Add(view);
 
             var navigationUri = new Uri(view.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -217,7 +211,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { });
 
             // Verify
-            mockINavigationAwareDataContext.Verify(v => v.OnNavigatedTo(It.Is<NavigationContext>(nc => nc.Uri == navigationUri)));
+            navigationAwareDataContext.Received().OnNavigatedTo(Arg.Is<NavigationContext>(nc => nc.Uri == navigationUri));
         }
 
         [StaFact]
@@ -226,25 +220,24 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            Mock<FrameworkElement> mockFrameworkElement = new Mock<FrameworkElement>();
-            Mock<INavigationAware> mockINavigationAwareView = mockFrameworkElement.As<INavigationAware>();
-            mockINavigationAwareView.Setup(ina => ina.IsNavigationTarget(It.IsAny<NavigationContext>())).Returns(true);
+            FrameworkElement frameworkElement = Substitute.For<FrameworkElement, INavigationAware>();
+            INavigationAware navigationAwareView = (INavigationAware)frameworkElement;
+            navigationAwareView.IsNavigationTarget(Arg.Any<NavigationContext>()).Returns(true);
 
-            Mock<INavigationAware> mockINavigationAwareDataContext = new Mock<INavigationAware>();
-            mockINavigationAwareDataContext.Setup(ina => ina.IsNavigationTarget(It.IsAny<NavigationContext>())).Returns(true);
-            mockFrameworkElement.Object.DataContext = mockINavigationAwareDataContext.Object;
+            INavigationAware navigationAwareDataContext = Substitute.For<INavigationAware>();
+            navigationAwareDataContext.IsNavigationTarget(Arg.Any<NavigationContext>()).Returns(true);
+            frameworkElement.DataContext = navigationAwareDataContext;
 
-            var view = mockFrameworkElement.Object;
+            var view = frameworkElement;
             region.Add(view);
 
             var navigationUri = new Uri(view.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -255,8 +248,8 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { });
 
             // Verify
-            mockINavigationAwareView.Verify(v => v.OnNavigatedTo(It.Is<NavigationContext>(nc => nc.Uri == navigationUri)));
-            mockINavigationAwareDataContext.Verify(v => v.OnNavigatedTo(It.Is<NavigationContext>(nc => nc.Uri == navigationUri)));
+            navigationAwareView.Received().OnNavigatedTo(Arg.Is<NavigationContext>(nc => nc.Uri == navigationUri));
+            navigationAwareDataContext.Received().OnNavigatedTo(Arg.Is<NavigationContext>(nc => nc.Uri == navigationUri));
         }
 
         [Fact]
@@ -275,16 +268,12 @@ namespace Refrakt.Wpf.Tests.Regions
 
             IRegionNavigationJournalEntry journalEntry = new RegionNavigationJournalEntry();
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(journalEntry);
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(journalEntry);
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
 
-            var journalMock = new Mock<IRegionNavigationJournal>();
-            journalMock.Setup(x => x.RecordNavigation(journalEntry, true)).Verifiable();
-
-            IRegionNavigationJournal journal = journalMock.Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
@@ -298,7 +287,7 @@ namespace Refrakt.Wpf.Tests.Regions
             // Verify
             Assert.NotNull(journalEntry);
             Assert.Equal(viewUri, journalEntry.Uri);
-            journalMock.VerifyAll();
+            journal.Received().RecordNavigation(journalEntry, true);
         }
 
         [Fact]
@@ -307,23 +296,18 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            var viewMock = new Mock<IConfirmNavigationRequest>();
-            viewMock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Verifiable();
+            var view = Substitute.For<IConfirmNavigationRequest>();
 
-            var view = viewMock.Object;
             region.Add(view);
             region.Activate(view);
 
             var navigationUri = new Uri(view.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -334,7 +318,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { });
 
             // Verify
-            viewMock.VerifyAll();
+            view.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
         }
 
         [Fact]
@@ -343,45 +327,38 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            var view1Mock = new Mock<IConfirmNavigationRequest>();
-            view1Mock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => c(true))
-                .Verifiable();
+            var view1 = Substitute.For<IConfirmNavigationRequest>();
+            view1
+                .When(ina => ina.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => ci.ArgAt<Action<bool>>(1)(true));
 
-            var view1 = view1Mock.Object;
             region.Add(view1);
             region.Activate(view1);
 
-            var view2Mock = new Mock<IConfirmNavigationRequest>();
+            var view2 = Substitute.For<IConfirmNavigationRequest>();
 
-            var view2 = view2Mock.Object;
             region.Add(view2);
 
-            var view3Mock = new Mock<INavigationAware>();
+            var view3 = Substitute.For<INavigationAware>();
 
-            var view3 = view3Mock.Object;
             region.Add(view3);
             region.Activate(view3);
 
-            var view4Mock = new Mock<IConfirmNavigationRequest>();
-            view4Mock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => c(true))
-                .Verifiable();
+            var view4 = Substitute.For<IConfirmNavigationRequest>();
+            view4
+                .When(ina => ina.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => ci.ArgAt<Action<bool>>(1)(true));
 
-            var view4 = view4Mock.Object;
             region.Add(view4);
             region.Activate(view4);
 
             var navigationUri = new Uri(view1.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -392,10 +369,10 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { });
 
             // Verify
-            view1Mock.VerifyAll();
-            view2Mock.Verify(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()), Times.Never());
-            view3Mock.VerifyAll();
-            view4Mock.VerifyAll();
+            view1.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
+            view2.DidNotReceive().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
+            // view3 has no configured call, so there is nothing to check on it.
+            view4.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
         }
 
         [Fact]
@@ -404,13 +381,10 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            var view1Mock = new Mock<IConfirmNavigationRequest>();
-            view1Mock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => c(true))
-                .Verifiable();
-
-            var view1 = view1Mock.Object;
+            var view1 = Substitute.For<IConfirmNavigationRequest>();
+            view1
+                .When(ina => ina.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => ci.ArgAt<Action<bool>>(1)(true));
 
             var view2 = new object();
 
@@ -421,12 +395,11 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationUri = new Uri(view2.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -438,7 +411,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { navigationSucceeded = nr.Result == true; });
 
             // Verify
-            view1Mock.VerifyAll();
+            view1.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
             Assert.True(navigationSucceeded);
             Assert.Equal(new object[] { view1, view2 }, region.ActiveViews.ToArray());
         }
@@ -449,13 +422,10 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            var view1Mock = new Mock<IConfirmNavigationRequest>();
-            view1Mock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => c(false))
-                .Verifiable();
-
-            var view1 = view1Mock.Object;
+            var view1 = Substitute.For<IConfirmNavigationRequest>();
+            view1
+                .When(ina => ina.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => ci.ArgAt<Action<bool>>(1)(false));
 
             var view2 = new object();
 
@@ -466,12 +436,11 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationUri = new Uri(view2.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -483,7 +452,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { navigationFailed = nr.Result == false; });
 
             // Verify
-            view1Mock.VerifyAll();
+            view1.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
             Assert.True(navigationFailed);
             Assert.Equal(new object[] { view1 }, region.ActiveViews.ToArray());
         }
@@ -494,27 +463,21 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            var viewModelMock = new Mock<IConfirmNavigationRequest>();
-            viewModelMock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Verifiable();
+            var viewModel = Substitute.For<IConfirmNavigationRequest>();
 
-            var viewMock = new Mock<FrameworkElement>();
-
-            var view = viewMock.Object;
-            view.DataContext = viewModelMock.Object;
+            var view = Substitute.For<FrameworkElement>();
+            view.DataContext = viewModel;
 
             region.Add(view);
             region.Activate(view);
 
             var navigationUri = new Uri(view.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -525,7 +488,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { });
 
             // Verify
-            viewModelMock.VerifyAll();
+            viewModel.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
         }
 
         [StaFact]
@@ -534,15 +497,13 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            var view1DataContextMock = new Mock<IConfirmNavigationRequest>();
-            view1DataContextMock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => c(true))
-                .Verifiable();
+            var view1DataContext = Substitute.For<IConfirmNavigationRequest>();
+            view1DataContext
+                .When(ina => ina.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => ci.ArgAt<Action<bool>>(1)(true));
 
-            var view1Mock = new Mock<FrameworkElement>();
-            var view1 = view1Mock.Object;
-            view1.DataContext = view1DataContextMock.Object;
+            var view1 = Substitute.For<FrameworkElement>();
+            view1.DataContext = view1DataContext;
 
             var view2 = new object();
 
@@ -553,12 +514,11 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationUri = new Uri(view2.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -570,7 +530,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { navigationSucceeded = nr.Result == true; });
 
             // Verify
-            view1DataContextMock.VerifyAll();
+            view1DataContext.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
             Assert.True(navigationSucceeded);
             Assert.Equal(new object[] { view1, view2 }, region.ActiveViews.ToArray());
         }
@@ -581,15 +541,13 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region();
 
-            var view1DataContextMock = new Mock<IConfirmNavigationRequest>();
-            view1DataContextMock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => c(false))
-                .Verifiable();
+            var view1DataContext = Substitute.For<IConfirmNavigationRequest>();
+            view1DataContext
+                .When(ina => ina.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => ci.ArgAt<Action<bool>>(1)(false));
 
-            var view1Mock = new Mock<FrameworkElement>();
-            var view1 = view1Mock.Object;
-            view1.DataContext = view1DataContextMock.Object;
+            var view1 = Substitute.For<FrameworkElement>();
+            view1.DataContext = view1DataContext;
 
             var view2 = new object();
 
@@ -600,12 +558,11 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationUri = new Uri(view2.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -617,7 +574,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { navigationFailed = nr.Result == false; });
 
             // Verify
-            view1DataContextMock.VerifyAll();
+            view1DataContext.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
             Assert.True(navigationFailed);
             Assert.Equal(new object[] { view1 }, region.ActiveViews.ToArray());
         }
@@ -627,33 +584,30 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             var region = new Region();
 
-            var viewMock = new Mock<IConfirmNavigationRequest>();
-            var view = viewMock.Object;
+            var view = Substitute.For<IConfirmNavigationRequest>();
 
             var confirmationRequests = new List<Action<bool>>();
 
-            viewMock
-                .Setup(icnr => icnr.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => { confirmationRequests.Add(c); });
+            view
+                .When(icnr => icnr.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => { confirmationRequests.Add(ci.ArgAt<Action<bool>>(1)); });
 
             region.Add(view);
             region.Activate(view);
 
             var navigationUri = new Uri("", UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock
-                .Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry)))
+            var container = Substitute.For<IContainerExtension>();
+            container
+                .Resolve(typeof(IRegionNavigationJournalEntry))
                 .Returns(new RegionNavigationJournalEntry());
 
-            var contentLoaderMock = new Mock<IRegionNavigationContentLoader>();
-            contentLoaderMock
-                .Setup(cl => cl.LoadContent(region, It.IsAny<NavigationContext>()))
+            var contentLoader = Substitute.For<IRegionNavigationContentLoader>();
+            contentLoader
+                .LoadContent(region, Arg.Any<NavigationContext>())
                 .Returns(view);
 
-            var container = containerMock.Object;
-            var contentLoader = contentLoaderMock.Object;
-            var journal = new Mock<IRegionNavigationJournal>().Object;
+            var journal = Substitute.For<IRegionNavigationJournal>();
 
             var target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -679,36 +633,33 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             var region = new Region();
 
-            var viewModelMock = new Mock<IConfirmNavigationRequest>();
+            var viewModel = Substitute.For<IConfirmNavigationRequest>();
 
-            var viewMock = new Mock<FrameworkElement>();
-            var view = viewMock.Object;
-            view.DataContext = viewModelMock.Object;
+            var view = Substitute.For<FrameworkElement>();
+            view.DataContext = viewModel;
 
             var confirmationRequests = new List<Action<bool>>();
 
-            viewModelMock
-                .Setup(icnr => icnr.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => { confirmationRequests.Add(c); });
+            viewModel
+                .When(icnr => icnr.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => { confirmationRequests.Add(ci.ArgAt<Action<bool>>(1)); });
 
             region.Add(view);
             region.Activate(view);
 
             var navigationUri = new Uri("", UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock
-                .Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry)))
+            var container = Substitute.For<IContainerExtension>();
+            container
+                .Resolve(typeof(IRegionNavigationJournalEntry))
                 .Returns(new RegionNavigationJournalEntry());
 
-            var contentLoaderMock = new Mock<IRegionNavigationContentLoader>();
-            contentLoaderMock
-                .Setup(cl => cl.LoadContent(region, It.IsAny<NavigationContext>()))
+            var contentLoader = Substitute.For<IRegionNavigationContentLoader>();
+            contentLoader
+                .LoadContent(region, Arg.Any<NavigationContext>())
                 .Returns(view);
 
-            var container = containerMock.Object;
-            var contentLoader = contentLoaderMock.Object;
-            var journal = new Mock<IRegionNavigationJournal>().Object;
+            var journal = Substitute.For<IRegionNavigationJournal>();
 
             var target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -743,12 +694,11 @@ namespace Refrakt.Wpf.Tests.Regions
             RegionManager regionManager = new RegionManager();
             regionManager.Regions.Add(regionName, region);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -787,12 +737,11 @@ namespace Refrakt.Wpf.Tests.Regions
             RegionManager regionManager = new RegionManager();
             regionManager.Regions.Add(regionName, region);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            IContainerExtension container = containerMock.Object;
             RegionNavigationContentLoader contentLoader = new RegionNavigationContentLoader(container);
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -820,27 +769,27 @@ namespace Refrakt.Wpf.Tests.Regions
         [Fact]
         public void WhenTargetViewCreationThrowsWithAsyncConfirmation_ThenExceptionIsProvidedToNavigationCallback()
         {
-            var containerMock = new Mock<IContainerExtension>();
+            var container = Substitute.For<IContainerExtension>();
 
             var targetException = new Exception();
-            var targetHandlerMock = new Mock<IRegionNavigationContentLoader>();
-            targetHandlerMock
-                .Setup(th => th.LoadContent(It.IsAny<IRegion>(), It.IsAny<NavigationContext>()))
+            var targetHandler = Substitute.For<IRegionNavigationContentLoader>();
+            targetHandler
+                .LoadContent(Arg.Any<IRegion>(), Arg.Any<NavigationContext>())
                 .Throws(targetException);
 
-            var journalMock = new Mock<IRegionNavigationJournal>();
+            var journal = Substitute.For<IRegionNavigationJournal>();
 
             Action<bool> navigationCallback = null;
-            var viewMock = new Mock<IConfirmNavigationRequest>();
-            viewMock
-                .Setup(v => v.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => { navigationCallback = c; });
+            var view = Substitute.For<IConfirmNavigationRequest>();
+            view
+                .When(v => v.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => { navigationCallback = ci.ArgAt<Action<bool>>(1); });
 
             var region = new Region();
-            region.Add(viewMock.Object);
-            region.Activate(viewMock.Object);
+            region.Add(view);
+            region.Activate(view);
 
-            var target = new RegionNavigationService(containerMock.Object, targetHandlerMock.Object, journalMock.Object)
+            var target = new RegionNavigationService(container, targetHandler, journal)
             {
                 Region = region
             };
@@ -858,8 +807,7 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             // Arrange
             var region = new Region();
-            var viewMock = new Mock<INavigationAware>();
-            var view = viewMock.Object;
+            var view = Substitute.For<INavigationAware>();
             region.Add(view);
 
             var view2 = new object();
@@ -867,13 +815,12 @@ namespace Refrakt.Wpf.Tests.Regions
 
             region.Activate(view);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
             var navigationUri = new Uri(view2.GetType().Name, UriKind.Relative);
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -884,7 +831,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { });
 
             // Verify
-            viewMock.Verify(v => v.OnNavigatedFrom(It.Is<NavigationContext>(ctx => ctx.Uri == navigationUri && ctx.Parameters.Count() == 0)));
+            view.Received().OnNavigatedFrom(Arg.Is<NavigationContext>(ctx => ctx.Uri == navigationUri && ctx.Parameters.Count() == 0));
         }
 
         [Fact]
@@ -896,27 +843,25 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var region = new Region();
 
-            var viewMock = new Mock<INavigationAware>();
-            viewMock
-                .Setup(x => x.OnNavigatedFrom(It.IsAny<NavigationContext>())).Callback(() => navigationFromInvoked = true);
-            var view = viewMock.Object;
+            var view = Substitute.For<INavigationAware>();
+            view
+                .When(x => x.OnNavigatedFrom(Arg.Any<NavigationContext>())).Do(_ => navigationFromInvoked = true);
             region.Add(view);
 
-            var targetViewMock = new Mock<INavigationAware>();
-            region.Add(targetViewMock.Object);
+            var targetView = Substitute.For<INavigationAware>();
+            region.Add(targetView);
 
-            var activeViewMock = new Mock<INavigationAware>();
-            region.Add(activeViewMock.Object);
+            var activeView = Substitute.For<INavigationAware>();
+            region.Add(activeView);
 
-            region.Activate(activeViewMock.Object);
+            region.Activate(activeView);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            var navigationUri = new Uri(targetViewMock.Object.GetType().Name, UriKind.Relative);
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            var navigationUri = new Uri(targetView.GetType().Name, UriKind.Relative);
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -936,11 +881,10 @@ namespace Refrakt.Wpf.Tests.Regions
             // Arrange
             var region = new Region();
 
-            var mockDataContext = new Mock<INavigationAware>();
+            var dataContext = Substitute.For<INavigationAware>();
 
-            var view1Mock = new Mock<FrameworkElement>();
-            var view1 = view1Mock.Object;
-            view1.DataContext = mockDataContext.Object;
+            var view1 = Substitute.For<FrameworkElement>();
+            view1.DataContext = dataContext;
 
             region.Add(view1);
 
@@ -949,13 +893,12 @@ namespace Refrakt.Wpf.Tests.Regions
 
             region.Activate(view1);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
             var navigationUri = new Uri(view2.GetType().Name, UriKind.Relative);
-            IContainerExtension container = containerMock.Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -966,7 +909,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => { });
 
             // Verify
-            mockDataContext.Verify(v => v.OnNavigatedFrom(It.Is<NavigationContext>(ctx => ctx.Uri == navigationUri && ctx.Parameters.Count() == 0)));
+            dataContext.Received().OnNavigatedFrom(Arg.Is<NavigationContext>(ctx => ctx.Uri == navigationUri && ctx.Parameters.Count() == 0));
         }
 
         [Fact]
@@ -975,9 +918,9 @@ namespace Refrakt.Wpf.Tests.Regions
             var region = new Region();
 
             var navigationUri = new Uri("/", UriKind.Relative);
-            IContainerExtension container = new Mock<IContainerExtension>().Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -995,9 +938,9 @@ namespace Refrakt.Wpf.Tests.Regions
         public void WhenNavigatingWithNoRegionSet_ThenMarshallExceptionToCallback()
         {
             var navigationUri = new Uri("/", UriKind.Relative);
-            IContainerExtension container = new Mock<IContainerExtension>().Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal);
 
@@ -1011,9 +954,9 @@ namespace Refrakt.Wpf.Tests.Regions
         [Fact]
         public void WhenNavigatingWithNullUri_ThenMarshallExceptionToCallback()
         {
-            IContainerExtension container = new Mock<IContainerExtension>().Object;
-            RegionNavigationContentLoader contentLoader = new Mock<RegionNavigationContentLoader>(container).Object;
-            IRegionNavigationJournal journal = new Mock<IRegionNavigationJournal>().Object;
+            IContainerExtension container = Substitute.For<IContainerExtension>();
+            RegionNavigationContentLoader contentLoader = Substitute.For<RegionNavigationContentLoader>(container);
+            IRegionNavigationJournal journal = Substitute.For<IRegionNavigationJournal>();
 
             RegionNavigationService target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -1034,17 +977,15 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region { Name = "RegionName" };
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            var container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            var contentLoaderMock = new Mock<IRegionNavigationContentLoader>();
-            contentLoaderMock
-                .Setup(cl => cl.LoadContent(region, It.IsAny<NavigationContext>()))
+            var contentLoader = Substitute.For<IRegionNavigationContentLoader>();
+            contentLoader
+                .LoadContent(region, Arg.Any<NavigationContext>())
                 .Throws<InvalidOperationException>();
 
-            var container = containerMock.Object;
-            var contentLoader = contentLoaderMock.Object;
-            var journal = new Mock<IRegionNavigationJournal>().Object;
+            var journal = Substitute.For<IRegionNavigationJournal>();
 
             var target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -1076,13 +1017,10 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region { Name = "RegionName" };
 
-            var view1Mock = new Mock<IConfirmNavigationRequest>();
-            view1Mock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => c(false))
-                .Verifiable();
-
-            var view1 = view1Mock.Object;
+            var view1 = Substitute.For<IConfirmNavigationRequest>();
+            view1
+                .When(ina => ina.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => ci.ArgAt<Action<bool>>(1)(false));
 
             var view2 = new object();
 
@@ -1093,17 +1031,15 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationUri = new Uri(view2.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            var container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            var contentLoaderMock = new Mock<IRegionNavigationContentLoader>();
-            contentLoaderMock
-                .Setup(cl => cl.LoadContent(region, It.IsAny<NavigationContext>()))
+            var contentLoader = Substitute.For<IRegionNavigationContentLoader>();
+            contentLoader
+                .LoadContent(region, Arg.Any<NavigationContext>())
                 .Returns(view2);
 
-            var container = containerMock.Object;
-            var contentLoader = contentLoaderMock.Object;
-            var journal = new Mock<IRegionNavigationJournal>().Object;
+            var journal = Substitute.For<IRegionNavigationJournal>();
 
             var target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -1124,7 +1060,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => isNavigationSuccessful = nr.Result);
 
             // Verify
-            view1Mock.VerifyAll();
+            view1.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
             Assert.False(isNavigationSuccessful.Value);
             Assert.NotNull(eventArgs);
             Assert.Null(eventArgs.Error);
@@ -1136,15 +1072,13 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             var region = new Region { Name = "RegionName" };
 
-            var viewModel1Mock = new Mock<IConfirmNavigationRequest>();
-            viewModel1Mock
-                .Setup(ina => ina.ConfirmNavigationRequest(It.IsAny<NavigationContext>(), It.IsAny<Action<bool>>()))
-                .Callback<NavigationContext, Action<bool>>((nc, c) => c(false))
-                .Verifiable();
+            var viewModel1 = Substitute.For<IConfirmNavigationRequest>();
+            viewModel1
+                .When(ina => ina.ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>()))
+                .Do(ci => ci.ArgAt<Action<bool>>(1)(false));
 
-            var view1Mock = new Mock<FrameworkElement>();
-            var view1 = view1Mock.Object;
-            view1.DataContext = viewModel1Mock.Object;
+            var view1 = Substitute.For<FrameworkElement>();
+            view1.DataContext = viewModel1;
 
             var view2 = new object();
 
@@ -1155,17 +1089,15 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationUri = new Uri(view2.GetType().Name, UriKind.Relative);
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationJournalEntry))).Returns(new RegionNavigationJournalEntry());
+            var container = Substitute.For<IContainerExtension>();
+            container.Resolve(typeof(IRegionNavigationJournalEntry)).Returns(new RegionNavigationJournalEntry());
 
-            var contentLoaderMock = new Mock<IRegionNavigationContentLoader>();
-            contentLoaderMock
-                .Setup(cl => cl.LoadContent(region, It.IsAny<NavigationContext>()))
+            var contentLoader = Substitute.For<IRegionNavigationContentLoader>();
+            contentLoader
+                .LoadContent(region, Arg.Any<NavigationContext>())
                 .Returns(view2);
 
-            var container = containerMock.Object;
-            var contentLoader = contentLoaderMock.Object;
-            var journal = new Mock<IRegionNavigationJournal>().Object;
+            var journal = Substitute.For<IRegionNavigationJournal>();
 
             var target = new RegionNavigationService(container, contentLoader, journal)
             {
@@ -1186,7 +1118,7 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RequestNavigate(navigationUri, nr => isNavigationSuccessful = nr.Result);
 
             // Verify
-            viewModel1Mock.VerifyAll();
+            viewModel1.Received().ConfirmNavigationRequest(Arg.Any<NavigationContext>(), Arg.Any<Action<bool>>());
             Assert.False(isNavigationSuccessful.Value);
             Assert.NotNull(eventArgs);
             Assert.Null(eventArgs.Error);
