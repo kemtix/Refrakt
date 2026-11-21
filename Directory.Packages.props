@@ -1,0 +1,29 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="DryIoc.dll" Version="4.7.7" />
+
+    <PackageVersion Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.161" />
+  </ItemGroup>
+
+  <!-- Tests -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageVersion Include="Moq" Version="4.16.1" />
+    <PackageVersion Include="xunit" Version="2.4.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.3" />
+    <PackageVersion Include="Xunit.StaFact" Version="1.0.37" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(DISABLE_GITVERSIONING) != 'true' ">
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.10.94"
+                            Condition=" !$(MSBuildProjectDirectory.Contains('e2e')) "/>
+  </ItemGroup>
+</Project>
