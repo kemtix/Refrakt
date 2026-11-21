@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <NeutralLanguage>en</NeutralLanguage>
-    <Authors>Brian Lagunas;Dan Siegel</Authors>
+    <Authors>Kemtix</Authors>
     <PackageProjectUrl>https://github.com/kemtix/Refrakt</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>refrakt-logo.png</PackageIcon>
