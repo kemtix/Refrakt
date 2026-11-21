@@ -37,11 +37,9 @@ Each supported IoC container has its own package assisting in the setup and usag
 
 ## Building
 
-The solutions are at the root of the repository:
+The solution is at the root of the repository:
 
-- `Refrakt.sln`: the full library
-- `Refrakt_Core.sln`: the core library only
-- `Refrakt_Wpf.sln`: the core and WPF libraries
+- `Refrakt.slnx`: the libraries, tests and e2e sample
 
 ## Contributing
 
