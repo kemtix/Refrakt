@@ -8,7 +8,7 @@ namespace Refrakt.Modularity
     /// Exception that's thrown when there is no <see cref="IModuleTypeLoader"/> registered in 
     /// <see cref="ModuleManager.ModuleTypeLoaders"/> that can handle this particular type of module. 
     /// </summary>
-    public partial class ModuleTypeLoaderNotFoundException : ModularityException
+    public class ModuleTypeLoaderNotFoundException : ModularityException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleTypeLoaderNotFoundException"/> class.

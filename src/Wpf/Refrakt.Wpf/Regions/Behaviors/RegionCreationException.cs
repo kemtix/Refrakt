@@ -7,7 +7,7 @@ namespace Refrakt.Regions.Behaviors
     /// <summary>
     /// Represents errors that occured during region creation.
     /// </summary>
-    public partial class RegionCreationException : Exception
+    public class RegionCreationException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RegionCreationException"/>

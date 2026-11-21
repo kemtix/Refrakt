@@ -5,7 +5,7 @@ namespace Refrakt.Regions
     /// <summary>
     /// Represents errors that occured during the regions' update.
     /// </summary>
-    public partial class UpdateRegionsException : Exception
+    public class UpdateRegionsException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdateRegionsException"/>

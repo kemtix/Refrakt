@@ -7,7 +7,7 @@ namespace Refrakt.Modularity
     /// <summary>
     /// Exception thrown when a requested <see cref="InitializationMode.OnDemand"/> <see cref="IModule"/> was not found.
     /// </summary>
-    public partial class ModuleNotFoundException : ModularityException
+    public class ModuleNotFoundException : ModularityException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleNotFoundException" /> class.

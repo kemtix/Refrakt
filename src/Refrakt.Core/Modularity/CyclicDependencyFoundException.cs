@@ -6,7 +6,7 @@ namespace Refrakt.Modularity
     /// Represents the exception that is thrown when there is a circular dependency
     /// between modules during the module loading process.
     /// </summary>
-    public partial class CyclicDependencyFoundException : ModularityException
+    public class CyclicDependencyFoundException : ModularityException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CyclicDependencyFoundException"/> class.

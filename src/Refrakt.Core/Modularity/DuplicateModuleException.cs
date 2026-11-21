@@ -7,7 +7,7 @@ namespace Refrakt.Modularity
     /// <summary>
     /// Exception thrown when a module is declared twice in the same catalog.
     /// </summary>
-    public partial class DuplicateModuleException : ModularityException
+    public class DuplicateModuleException : ModularityException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DuplicateModuleException"/> class.

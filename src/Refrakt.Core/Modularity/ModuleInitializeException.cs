@@ -10,7 +10,7 @@ namespace Refrakt.Modularity
     /// Exception thrown by <see cref="IModuleInitializer"/> implementations whenever 
     /// a module fails to load.
     /// </summary>
-    public partial class ModuleInitializeException : ModularityException
+    public class ModuleInitializeException : ModularityException
     {
         /// <summary>
         /// Initializes a new instance.

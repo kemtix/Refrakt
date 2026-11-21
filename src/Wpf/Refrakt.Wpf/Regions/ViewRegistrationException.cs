@@ -5,7 +5,7 @@ namespace Refrakt.Regions
     /// <summary>
     /// Exception that's thrown when something goes wrong while Registering a View with a region name in the <see cref="RegionViewRegistry"/> class. 
     /// </summary>
-    public partial class ViewRegistrationException : Exception
+    public class ViewRegistrationException : Exception
     {
         // TODO: Find updated links as these are dead...
         //

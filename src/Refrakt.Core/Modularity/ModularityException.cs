@@ -7,7 +7,7 @@ namespace Refrakt.Modularity
     /// <summary>
     /// Base class for exceptions that are thrown because of a problem with modules. 
     /// </summary>
-    public partial class ModularityException : Exception
+    public class ModularityException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ModularityException"/> class.
