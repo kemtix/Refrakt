@@ -1,4 +1,4 @@
-using Moq;
+using NSubstitute;
 using Refrakt.Container.Wpf.Mocks;
 using Refrakt.Events;
 using Refrakt.Ioc;
@@ -177,16 +177,16 @@ namespace Refrakt.Container.Wpf.Tests.Bootstrapper
         public void ModuleManagerRunCalled()
         {
             // Have to use a non-mocked container because of IsRegistered<> extension method, Registrations property,and ContainerRegistration
-            var mockedModuleInitializer = new Mock<IModuleInitializer>();
-            var mockedModuleManager = new Mock<IModuleManager>();
+            var mockedModuleInitializer = Substitute.For<IModuleInitializer>();
+            var mockedModuleManager = Substitute.For<IModuleManager>();
             var regionAdapterMappings = new RegionAdapterMappings();
             var container = ContainerHelper.CreateContainerExtension();
             var regionBehaviorFactory = new RegionBehaviorFactory(container);
 
             container.RegisterInstance<IContainerExtension>(container);
             container.RegisterInstance<IModuleCatalog>(new ModuleCatalog());
-            container.RegisterInstance<IModuleInitializer>(mockedModuleInitializer.Object);
-            container.RegisterInstance<IModuleManager>(mockedModuleManager.Object);
+            container.RegisterInstance<IModuleInitializer>(mockedModuleInitializer);
+            container.RegisterInstance<IModuleManager>(mockedModuleManager);
             container.RegisterInstance<RegionAdapterMappings>(regionAdapterMappings);
 
             container.RegisterSingleton(typeof(RegionAdapterMappings), typeof(RegionAdapterMappings));
@@ -206,7 +206,7 @@ namespace Refrakt.Container.Wpf.Tests.Bootstrapper
             var bootstrapper = new MockedContainerBootstrapper(container.GetBaseContainer());
             bootstrapper.Run(false);
 
-            mockedModuleManager.Verify(mm => mm.Run(), Times.Once());
+            mockedModuleManager.Received(1).Run();
         }
 
         [StaFact]

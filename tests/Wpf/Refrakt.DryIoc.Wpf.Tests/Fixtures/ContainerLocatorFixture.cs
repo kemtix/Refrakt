@@ -1,5 +1,6 @@
+using System.Linq;
 using DryIoc;
-using Moq;
+using NSubstitute;
 using Refrakt.Ioc;
 using Xunit;
 
@@ -10,18 +11,18 @@ namespace Refrakt.DryIoc.Wpf.Tests
         [Fact]
         public void ShouldForwardResolveToInnerContainer()
         {
-            var mockContainer = new Mock<IContainer>();
+            var mockContainer = Substitute.For<IContainer>();
 
-            Assert.Empty(mockContainer.Invocations);
-            var containerExtension = new DryIocContainerExtension(mockContainer.Object);
+            Assert.Empty(mockContainer.ReceivedCalls());
+            var containerExtension = new DryIocContainerExtension(mockContainer);
 
             // We register the IContainerExtension and IContainerProvider directly with the container in the ctor.
-            Assert.Equal(2, mockContainer.Invocations.Count);
+            Assert.Equal(2, mockContainer.ReceivedCalls().Count());
             ContainerLocator.ResetContainer();
             ContainerLocator.SetContainerExtension(() => containerExtension);
 
             var resolved = ContainerLocator.Container.Resolve(typeof(object));
-            Assert.Equal(3, mockContainer.Invocations.Count);
+            Assert.Equal(3, mockContainer.ReceivedCalls().Count());
         }
     }
 }

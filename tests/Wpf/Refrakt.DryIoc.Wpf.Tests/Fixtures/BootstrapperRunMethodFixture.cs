@@ -1,6 +1,6 @@
 using System;
 using DryIoc;
-using Moq;
+using NSubstitute;
 using Refrakt.Container.Wpf.Mocks;
 using Refrakt.DryIoc;
 using Refrakt.Events;
@@ -8,6 +8,7 @@ using Refrakt.Ioc;
 using Refrakt.Modularity;
 using Refrakt.Regions;
 using Xunit;
+using Arg = NSubstitute.Arg;
 
 namespace Refrakt.Container.Wpf.Tests.Bootstrapper
 {
@@ -27,141 +28,147 @@ namespace Refrakt.Container.Wpf.Tests.Bootstrapper
         [StaFact]
         public void RunRegistersInstanceOfIModuleCatalog()
         {
-            var mockedContainer = new Mock<IContainer>();
+            var mockedContainer = Substitute.For<IContainer, IResolver>();
             SetupMockedContainerForVerificationTests(mockedContainer);
 
-            var bootstrapper = new MockedContainerBootstrapper(mockedContainer.Object);
+            var bootstrapper = new MockedContainerBootstrapper(mockedContainer);
 
             bootstrapper.Run();
 
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IModuleCatalog), It.IsAny<object>(), It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()));
+            mockedContainer.Received().Register(Arg.Any<Factory>(), Arg.Is(typeof(IModuleCatalog)), Arg.Any<object>(), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
         }
 
         [StaFact]
         public void RunRegistersTypeForIModuleInitializer()
         {
-            var mockedContainer = new Mock<IContainer>();
+            var mockedContainer = Substitute.For<IContainer, IResolver>();
             SetupMockedContainerForVerificationTests(mockedContainer);
 
-            var bootstrapper = new MockedContainerBootstrapper(mockedContainer.Object);
+            var bootstrapper = new MockedContainerBootstrapper(mockedContainer);
 
             bootstrapper.Run();
 
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IModuleInitializer), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Once());
+            mockedContainer.Received(1).Register(Arg.Any<Factory>(), Arg.Is(typeof(IModuleInitializer)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
         }
 
         [StaFact]
         public void RunRegistersTypeForIRegionManager()
         {
-            var mockedContainer = new Mock<IContainer>();
+            var mockedContainer = Substitute.For<IContainer, IResolver>();
             SetupMockedContainerForVerificationTests(mockedContainer);
 
-            var bootstrapper = new MockedContainerBootstrapper(mockedContainer.Object);
+            var bootstrapper = new MockedContainerBootstrapper(mockedContainer);
 
             bootstrapper.Run();
 
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IRegionManager), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Once());
+            mockedContainer.Received(1).Register(Arg.Any<Factory>(), Arg.Is(typeof(IRegionManager)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
         }
 
         [StaFact]
         public void RunRegistersTypeForRegionAdapterMappings()
         {
-            var mockedContainer = new Mock<IContainer>();
+            var mockedContainer = Substitute.For<IContainer, IResolver>();
             SetupMockedContainerForVerificationTests(mockedContainer);
 
-            var bootstrapper = new MockedContainerBootstrapper(mockedContainer.Object);
+            var bootstrapper = new MockedContainerBootstrapper(mockedContainer);
 
             bootstrapper.Run();
 
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(RegionAdapterMappings), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Once());
+            mockedContainer.Received(1).Register(Arg.Any<Factory>(), Arg.Is(typeof(RegionAdapterMappings)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
         }
 
         [StaFact]
         public void RunRegistersTypeForIRegionViewRegistry()
         {
-            var mockedContainer = new Mock<IContainer>();
+            var mockedContainer = Substitute.For<IContainer, IResolver>();
             SetupMockedContainerForVerificationTests(mockedContainer);
 
-            var bootstrapper = new MockedContainerBootstrapper(mockedContainer.Object);
+            var bootstrapper = new MockedContainerBootstrapper(mockedContainer);
 
             bootstrapper.Run();
 
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IRegionViewRegistry), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Once());
+            mockedContainer.Received(1).Register(Arg.Any<Factory>(), Arg.Is(typeof(IRegionViewRegistry)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
         }
 
         [StaFact]
         public void RunRegistersTypeForIRegionBehaviorFactory()
         {
-            var mockedContainer = new Mock<IContainer>();
+            var mockedContainer = Substitute.For<IContainer, IResolver>();
             SetupMockedContainerForVerificationTests(mockedContainer);
 
-            var bootstrapper = new MockedContainerBootstrapper(mockedContainer.Object);
+            var bootstrapper = new MockedContainerBootstrapper(mockedContainer);
 
             bootstrapper.Run();
 
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IRegionBehaviorFactory), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Once());
+            mockedContainer.Received(1).Register(Arg.Any<Factory>(), Arg.Is(typeof(IRegionBehaviorFactory)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
         }
 
         [StaFact]
         public void RunRegistersTypeForIEventAggregator()
         {
-            var mockedContainer = new Mock<IContainer>();
+            var mockedContainer = Substitute.For<IContainer, IResolver>();
             SetupMockedContainerForVerificationTests(mockedContainer);
 
-            var bootstrapper = new MockedContainerBootstrapper(mockedContainer.Object);
+            var bootstrapper = new MockedContainerBootstrapper(mockedContainer);
 
             bootstrapper.Run();
 
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IEventAggregator), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Once());
+            mockedContainer.Received(1).Register(Arg.Any<Factory>(), Arg.Is(typeof(IEventAggregator)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
         }
 
         [StaFact]
         public void RunFalseShouldNotRegisterDefaultServicesAndTypes()
         {
-            var mockedContainer = new Mock<IContainer>();
+            var mockedContainer = Substitute.For<IContainer, IResolver>();
             SetupMockedContainerForVerificationTests(mockedContainer);
 
-            var bootstrapper = new MockedContainerBootstrapper(mockedContainer.Object);
+            var bootstrapper = new MockedContainerBootstrapper(mockedContainer);
             bootstrapper.Run(false);
 
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IEventAggregator), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Never());
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IRegionManager), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Never());
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(RegionAdapterMappings), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Never());
-            mockedContainer.Verify(c => c.Register(It.IsAny<Factory>(), typeof(IModuleInitializer), null, It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()), Times.Never());
+            mockedContainer.DidNotReceive().Register(Arg.Any<Factory>(), Arg.Is(typeof(IEventAggregator)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
+            mockedContainer.DidNotReceive().Register(Arg.Any<Factory>(), Arg.Is(typeof(IRegionManager)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
+            mockedContainer.DidNotReceive().Register(Arg.Any<Factory>(), Arg.Is(typeof(RegionAdapterMappings)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
+            mockedContainer.DidNotReceive().Register(Arg.Any<Factory>(), Arg.Is(typeof(IModuleInitializer)), Arg.Is((object)null), Arg.Any<IfAlreadyRegistered?>(), Arg.Any<bool>());
         }
 
-        private static void SetupMockedContainerForVerificationTests(Mock<IContainer> mockedContainer)
+        private static void SetupMockedContainerForVerificationTests(IContainer mockedContainer)
         {
-            var mockedModuleInitializer = new Mock<IModuleInitializer>();
-            var mockedModuleManager = new Mock<IModuleManager>();
+            var mockedModuleInitializer = Substitute.For<IModuleInitializer>();
+            var mockedModuleManager = Substitute.For<IModuleManager>();
             var regionAdapterMappings = new RegionAdapterMappings();
 
-            var containerExtension = new DryIocContainerExtension(mockedContainer.Object);
+            var containerExtension = new DryIocContainerExtension(mockedContainer);
             var regionBehaviorFactory = new RegionBehaviorFactory(containerExtension);
 
-            mockedContainer.Setup(c => c.Register(It.IsAny<Factory>(), It.IsAny<Type>(), It.IsAny<string>(), It.IsAny<IfAlreadyRegistered?>(), It.IsAny<bool>()));
+            // Values are created before the Returns calls: creating them inside Returns(...) would call the substitute first.
+            var moduleCatalog = new ModuleCatalog();
+            var selectorRegionAdapter = new SelectorRegionAdapter(regionBehaviorFactory);
+            var itemsControlRegionAdapter = new ItemsControlRegionAdapter(regionBehaviorFactory);
+            var contentControlRegionAdapter = new ContentControlRegionAdapter(regionBehaviorFactory);
 
             // NOTE: The actual method called by Refrakt's DryIocContainerExtension is off over the IResolver not IContainer
-            mockedContainer.As<IResolver>().Setup(r => r.Resolve(typeof(IModuleCatalog), It.IsAny<object>(), IfUnresolved.Throw, It.IsAny<Type>(), It.IsAny<Request>(), It.IsAny<object[]>())).Returns(
-                new ModuleCatalog());
+            var mockedResolver = (IResolver)mockedContainer;
 
-            mockedContainer.As<IResolver>().Setup(c => c.Resolve(typeof(IModuleInitializer), It.IsAny<object>(), IfUnresolved.Throw, It.IsAny<Type>(), It.IsAny<Request>(), It.IsAny<object[]>())).Returns(
-                mockedModuleInitializer.Object);
+            mockedResolver.Resolve(Arg.Is(typeof(IModuleCatalog)), Arg.Any<object>(), Arg.Is(IfUnresolved.Throw), Arg.Any<Type>(), Arg.Any<Request>(), Arg.Any<object[]>()).Returns(
+                moduleCatalog);
 
-            mockedContainer.As<IResolver>().Setup(c => c.Resolve(typeof(IModuleManager), It.IsAny<object>(), IfUnresolved.Throw, It.IsAny<Type>(), It.IsAny<Request>(), It.IsAny<object[]>())).Returns(
-                mockedModuleManager.Object);
+            mockedResolver.Resolve(Arg.Is(typeof(IModuleInitializer)), Arg.Any<object>(), Arg.Is(IfUnresolved.Throw), Arg.Any<Type>(), Arg.Any<Request>(), Arg.Any<object[]>()).Returns(
+                mockedModuleInitializer);
 
-            mockedContainer.As<IResolver>().Setup(c => c.Resolve(typeof(RegionAdapterMappings), It.IsAny<object>(), IfUnresolved.Throw, It.IsAny<Type>(), It.IsAny<Request>(), It.IsAny<object[]>())).Returns(
+            mockedResolver.Resolve(Arg.Is(typeof(IModuleManager)), Arg.Any<object>(), Arg.Is(IfUnresolved.Throw), Arg.Any<Type>(), Arg.Any<Request>(), Arg.Any<object[]>()).Returns(
+                mockedModuleManager);
+
+            mockedResolver.Resolve(Arg.Is(typeof(RegionAdapterMappings)), Arg.Any<object>(), Arg.Is(IfUnresolved.Throw), Arg.Any<Type>(), Arg.Any<Request>(), Arg.Any<object[]>()).Returns(
                 regionAdapterMappings);
 
-            mockedContainer.As<IResolver>().Setup(c => c.Resolve(typeof(SelectorRegionAdapter), It.IsAny<object>(), IfUnresolved.Throw, It.IsAny<Type>(), It.IsAny<Request>(), It.IsAny<object[]>())).Returns(
-                new SelectorRegionAdapter(regionBehaviorFactory));
+            mockedResolver.Resolve(Arg.Is(typeof(SelectorRegionAdapter)), Arg.Any<object>(), Arg.Is(IfUnresolved.Throw), Arg.Any<Type>(), Arg.Any<Request>(), Arg.Any<object[]>()).Returns(
+                selectorRegionAdapter);
 
-            mockedContainer.As<IResolver>().Setup(c => c.Resolve(typeof(ItemsControlRegionAdapter), It.IsAny<object>(), IfUnresolved.Throw, It.IsAny<Type>(), It.IsAny<Request>(), It.IsAny<object[]>())).Returns(
-                new ItemsControlRegionAdapter(regionBehaviorFactory));
+            mockedResolver.Resolve(Arg.Is(typeof(ItemsControlRegionAdapter)), Arg.Any<object>(), Arg.Is(IfUnresolved.Throw), Arg.Any<Type>(), Arg.Any<Request>(), Arg.Any<object[]>()).Returns(
+                itemsControlRegionAdapter);
 
-            mockedContainer.As<IResolver>().Setup(c => c.Resolve(typeof(ContentControlRegionAdapter), It.IsAny<object>(), IfUnresolved.Throw, It.IsAny<Type>(), It.IsAny<Request>(), It.IsAny<object[]>())).Returns(
-                new ContentControlRegionAdapter(regionBehaviorFactory));
+            mockedResolver.Resolve(Arg.Is(typeof(ContentControlRegionAdapter)), Arg.Any<object>(), Arg.Is(IfUnresolved.Throw), Arg.Any<Type>(), Arg.Any<Request>(), Arg.Any<object[]>()).Returns(
+                contentControlRegionAdapter);
         }
     }
 }
