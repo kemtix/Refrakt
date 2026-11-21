@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 using NSubstitute;
 using Refrakt.Ioc;
 using Refrakt.Regions;
@@ -170,16 +171,23 @@ namespace Refrakt.Wpf.Tests.Regions
         [Fact]
         public void ShouldNotPreventSubscribersToStaticEventFromBeingGarbageCollected()
         {
+            WeakReference subscriberWeakReference = SubscribeToUpdatingRegions();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            Assert.False(subscriberWeakReference.IsAlive);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static WeakReference SubscribeToUpdatingRegions()
+        {
             var subscriber = new MySubscriberClass();
             RegionManager.UpdatingRegions += subscriber.OnUpdatingRegions;
             RegionManager.UpdateRegions();
             Assert.True(subscriber.OnUpdatingRegionsCalled);
-            WeakReference subscriberWeakReference = new WeakReference(subscriber);
-
-            subscriber = null;
-            GC.Collect();
-
-            Assert.False(subscriberWeakReference.IsAlive);
+            return new WeakReference(subscriber);
         }
 
         [Fact]

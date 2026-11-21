@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using NSubstitute;
 using Refrakt.Ioc;
@@ -66,15 +67,22 @@ namespace Refrakt.Wpf.Tests.Regions
         public void ShouldNotPreventSubscribersFromBeingGarbageCollected()
         {
             var registry = new RegionViewRegistry(null);
-            var subscriber = new MySubscriberClass();
-            registry.ContentRegistered += subscriber.OnContentRegistered;
+            WeakReference subscriberWeakReference = SubscribeToContentRegistered(registry);
 
-            WeakReference subscriberWeakReference = new WeakReference(subscriber);
-
-            subscriber = null;
             GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            GC.KeepAlive(registry);
 
             Assert.False(subscriberWeakReference.IsAlive);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static WeakReference SubscribeToContentRegistered(RegionViewRegistry registry)
+        {
+            var subscriber = new MySubscriberClass();
+            registry.ContentRegistered += subscriber.OnContentRegistered;
+            return new WeakReference(subscriber);
         }
 
         [Fact]

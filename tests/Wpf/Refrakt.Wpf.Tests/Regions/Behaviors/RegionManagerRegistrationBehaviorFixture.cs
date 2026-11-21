@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using Refrakt.Regions;
 using Refrakt.Regions.Behaviors;
@@ -188,13 +189,9 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
         public void BehaviorDoesNotPreventRegionManagerFromBeingGarbageCollected()
         {
             var control = new MockFrameworkElement();
-            var regionManager = new MockRegionManager();
-            var regionManagerWeakReference = new WeakReference(regionManager);
-
             var accessor = new MockRegionManagerAccessor
             {
-                GetRegionName = d => "myRegionName",
-                GetRegionManager = d => regionManager
+                GetRegionName = d => "myRegionName"
             };
 
             var behavior = new RegionManagerRegistrationBehavior()
@@ -203,16 +200,33 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
                 Region = new MockPresentationRegion(),
                 HostControl = control
             };
+
+            WeakReference regionManagerWeakReference = AttachWithRegionManager(accessor, behavior);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            GC.KeepAlive(behavior);
+            GC.KeepAlive(accessor);
+            GC.KeepAlive(control);
+
+            Assert.False(regionManagerWeakReference.IsAlive);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static WeakReference AttachWithRegionManager(MockRegionManagerAccessor accessor, RegionManagerRegistrationBehavior behavior)
+        {
+            var regionManager = new MockRegionManager();
+            var regionManagerWeakReference = new WeakReference(regionManager);
+            accessor.GetRegionManager = d => regionManager;
+
             behavior.Attach();
 
             Assert.True(regionManagerWeakReference.IsAlive);
-            GC.KeepAlive(regionManager);
 
+            // The accessor, which the test keeps, holds this lambda and the variable it captures.
             regionManager = null;
-
-            GC.Collect();
-
-            Assert.False(regionManagerWeakReference.IsAlive);
+            return regionManagerWeakReference;
         }
 
         internal class MockRegionManager : IRegionManager

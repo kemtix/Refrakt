@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using Refrakt.Regions;
 using Refrakt.Regions.Behaviors;
@@ -28,10 +29,25 @@ namespace Refrakt.Wpf.Tests.Regions
         [StaFact]
         public void AdapterDoesNotPreventRegionFromBeingGarbageCollected()
         {
-            var selector = new ListBox();
             object model = new object();
             IRegionAdapter adapter = new SelectorRegionAdapter(null);
 
+            (WeakReference regionWeakReference, WeakReference controlWeakReference) = CreateRegionWithModel(adapter, model);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            GC.KeepAlive(adapter);
+            GC.KeepAlive(model);
+
+            Assert.False(regionWeakReference.IsAlive);
+            Assert.False(controlWeakReference.IsAlive);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static (WeakReference Region, WeakReference Control) CreateRegionWithModel(IRegionAdapter adapter, object model)
+        {
+            var selector = new ListBox();
             var region = adapter.Initialize(selector, "Region1");
             region.Add(model);
 
@@ -39,14 +55,7 @@ namespace Refrakt.Wpf.Tests.Regions
             WeakReference controlWeakReference = new WeakReference(selector);
             Assert.True(regionWeakReference.IsAlive);
             Assert.True(controlWeakReference.IsAlive);
-
-            region = null;
-            selector = null;
-            GC.Collect();
-            GC.Collect();
-
-            Assert.False(regionWeakReference.IsAlive);
-            Assert.False(controlWeakReference.IsAlive);
+            return (regionWeakReference, controlWeakReference);
         }
 
         [StaFact]

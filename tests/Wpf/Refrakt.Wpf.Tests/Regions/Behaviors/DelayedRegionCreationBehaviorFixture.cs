@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using Refrakt.Regions;
 using Refrakt.Regions.Behaviors;
@@ -105,48 +106,64 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
         [StaFact]
         public void BehaviorDoesNotPreventControlFromBeingGarbageCollected()
         {
-            var control = new MockFrameworkElement();
-            WeakReference controlWeakReference = new WeakReference(control);
-
             var accessor = new MockRegionManagerAccessor
             {
                 GetRegionName = d => "myRegionName"
             };
+
+            WeakReference controlWeakReference = this.AttachBehaviorToNewControl(accessor);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            GC.KeepAlive(accessor);
+
+            Assert.False(controlWeakReference.IsAlive);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private WeakReference AttachBehaviorToNewControl(MockRegionManagerAccessor accessor)
+        {
+            var control = new MockFrameworkElement();
+            WeakReference controlWeakReference = new WeakReference(control);
 
             var behavior = this.GetBehavior(control, accessor);
             behavior.Attach();
 
             Assert.True(controlWeakReference.IsAlive);
-            GC.KeepAlive(control);
-
-            control = null;
-            GC.Collect();
-
-            Assert.False(controlWeakReference.IsAlive);
+            return controlWeakReference;
         }
 
         [StaFact]
         public void BehaviorDoesNotPreventControlFromBeingGarbageCollectedWhenRegionWasCreated()
         {
-            var control = new MockFrameworkElement();
-            WeakReference controlWeakReference = new WeakReference(control);
-
             var accessor = new MockRegionManagerAccessor
             {
                 GetRegionName = d => "myRegionName"
             };
+
+            WeakReference controlWeakReference = this.AttachBehaviorToNewControlAndCreateRegion(accessor);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            GC.KeepAlive(accessor);
+
+            Assert.False(controlWeakReference.IsAlive);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private WeakReference AttachBehaviorToNewControlAndCreateRegion(MockRegionManagerAccessor accessor)
+        {
+            var control = new MockFrameworkElement();
+            WeakReference controlWeakReference = new WeakReference(control);
 
             var behavior = this.GetBehavior(control, accessor);
             behavior.Attach();
             accessor.UpdateRegions();
 
             Assert.True(controlWeakReference.IsAlive);
-            GC.KeepAlive(control);
-
-            control = null;
-            GC.Collect();
-
-            Assert.False(controlWeakReference.IsAlive);
+            return controlWeakReference;
         }
 
         [StaFact]
@@ -179,29 +196,47 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
                 GetRegionName = d => "myRegionName"
             };
 
+            WeakReference behaviorWeakReference = this.AttachFirstBehaviorAndCreateRegion(control, accessor);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            Assert.False(behaviorWeakReference.IsAlive);
+
+            WeakReference behaviorWeakReference2 = this.AttachSecondBehaviorAndCreateRegion(control2, accessor);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            GC.KeepAlive(control);
+            GC.KeepAlive(control2);
+            GC.KeepAlive(accessor);
+
+            Assert.False(behaviorWeakReference2.IsAlive);
+        }
+
+        // One helper per behavior, so that each keeps its own liveness pre-check, as before.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private WeakReference AttachFirstBehaviorAndCreateRegion(DependencyObject control, MockRegionManagerAccessor accessor)
+        {
             var behavior = this.GetBehavior(control, accessor);
             WeakReference behaviorWeakReference = new WeakReference(behavior);
             behavior.Attach();
             accessor.UpdateRegions();
             Assert.True(behaviorWeakReference.IsAlive);
-            GC.KeepAlive(behavior);
+            return behaviorWeakReference;
+        }
 
-            behavior = null;
-            GC.Collect();
-
-            Assert.False(behaviorWeakReference.IsAlive);
-
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private WeakReference AttachSecondBehaviorAndCreateRegion(DependencyObject control2, MockRegionManagerAccessor accessor)
+        {
             var behavior2 = this.GetBehavior(control2, accessor);
             WeakReference behaviorWeakReference2 = new WeakReference(behavior2);
             behavior2.Attach();
             accessor.UpdateRegions();
             Assert.True(behaviorWeakReference2.IsAlive);
-            GC.KeepAlive(behavior2);
-
-            behavior2 = null;
-            GC.Collect();
-
-            Assert.False(behaviorWeakReference2.IsAlive);
+            return behaviorWeakReference2;
         }
     }
 }
