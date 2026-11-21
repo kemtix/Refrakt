@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Windows;
-using Moq;
+using NSubstitute;
 using Refrakt.Ioc;
 using Refrakt.Regions;
 using Refrakt.Wpf.Tests.Mvvm;
@@ -15,9 +15,9 @@ namespace Refrakt.Wpf.Tests.Regions
         [Fact]
         public void CanRegisterContentAndRetrieveIt()
         {
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(c => c.Resolve(typeof(MockContentObject))).Returns(new MockContentObject());
-            var registry = new RegionViewRegistry(containerMock.Object);
+            var containerMock = Substitute.For<IContainerExtension>();
+            containerMock.Resolve(typeof(MockContentObject)).Returns(new MockContentObject());
+            var registry = new RegionViewRegistry(containerMock);
 
             registry.RegisterViewWithRegion("MyRegion", typeof(MockContentObject));
             var result = registry.GetContents("MyRegion");
@@ -32,9 +32,9 @@ namespace Refrakt.Wpf.Tests.Regions
         public void ShouldRaiseEventWhenAddingContent()
         {
             var listener = new MySubscriberClass();
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(c => c.Resolve(typeof(MockContentObject))).Returns(new MockContentObject());
-            var registry = new RegionViewRegistry(containerMock.Object);
+            var containerMock = Substitute.For<IContainerExtension>();
+            containerMock.Resolve(typeof(MockContentObject)).Returns(new MockContentObject());
+            var registry = new RegionViewRegistry(containerMock);
 
             registry.ContentRegistered += listener.OnContentRegistered;
 
@@ -118,10 +118,10 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             ViewModelLocatorFixture.ResetViewModelLocationProvider();
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(c => c.Resolve(typeof(Mocks.Views.Mock))).Returns(new Mocks.Views.Mock());
-            containerMock.Setup(c => c.Resolve(typeof(Mocks.ViewModels.MockViewModel))).Returns(new Mocks.ViewModels.MockViewModel());
-            var registry = new RegionViewRegistry(containerMock.Object);
+            var containerMock = Substitute.For<IContainerExtension>();
+            containerMock.Resolve(typeof(Mocks.Views.Mock)).Returns(new Mocks.Views.Mock());
+            containerMock.Resolve(typeof(Mocks.ViewModels.MockViewModel)).Returns(new Mocks.ViewModels.MockViewModel());
+            var registry = new RegionViewRegistry(containerMock);
 
             registry.RegisterViewWithRegion("MyRegion", typeof(Mocks.Views.Mock));
 
@@ -140,10 +140,10 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             ViewModelLocatorFixture.ResetViewModelLocationProvider();
 
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(c => c.Resolve(typeof(Mocks.Views.MockOptOut))).Returns(new Mocks.Views.MockOptOut());
-            containerMock.Setup(c => c.Resolve(typeof(Mocks.ViewModels.MockOptOutViewModel))).Returns(new Mocks.ViewModels.MockOptOutViewModel());
-            var registry = new RegionViewRegistry(containerMock.Object);
+            var containerMock = Substitute.For<IContainerExtension>();
+            containerMock.Resolve(typeof(Mocks.Views.MockOptOut)).Returns(new Mocks.Views.MockOptOut());
+            containerMock.Resolve(typeof(Mocks.ViewModels.MockOptOutViewModel)).Returns(new Mocks.ViewModels.MockOptOutViewModel());
+            var registry = new RegionViewRegistry(containerMock);
 
             registry.RegisterViewWithRegion("MyRegion", typeof(Mocks.Views.MockOptOut));
 

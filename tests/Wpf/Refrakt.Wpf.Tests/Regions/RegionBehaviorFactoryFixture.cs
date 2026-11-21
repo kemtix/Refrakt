@@ -2,7 +2,7 @@
 
 using System;
 using System.Linq;
-using Moq;
+using NSubstitute;
 using Refrakt.Ioc;
 using Refrakt.Regions;
 using Refrakt.Wpf.Tests.Mocks;
@@ -53,9 +53,9 @@ namespace Refrakt.Wpf.Tests.Regions
         public void CanCreateRegisteredType()
         {
             var expectedBehavior = new MockRegionBehavior();
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(c => c.Resolve(typeof(MockRegionBehavior))).Returns(expectedBehavior);
-            RegionBehaviorFactory factory = new RegionBehaviorFactory(containerMock.Object);
+            var containerMock = Substitute.For<IContainerExtension>();
+            containerMock.Resolve(typeof(MockRegionBehavior)).Returns(expectedBehavior);
+            RegionBehaviorFactory factory = new RegionBehaviorFactory(containerMock);
 
             factory.AddIfMissing("key1", typeof(MockRegionBehavior));
             var behavior = factory.CreateFromKey("key1");

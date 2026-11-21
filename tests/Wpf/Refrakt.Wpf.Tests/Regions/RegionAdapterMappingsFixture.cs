@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using Moq;
+using NSubstitute;
 using Refrakt.Ioc;
 using Refrakt.Regions;
 using Refrakt.Wpf.Tests.Mocks;
@@ -48,11 +48,11 @@ namespace Refrakt.Wpf.Tests.Regions
                 var regionAdapterMappings = new RegionAdapterMappings();
                 var regionAdapter = new MockRegionAdapter();
 
-                var containerMock = new Mock<IContainerExtension>();
-                containerMock.Setup(c => c.Resolve(typeof(MockRegionAdapter)))
+                var containerMock = Substitute.For<IContainerExtension>();
+                containerMock.Resolve(typeof(MockRegionAdapter))
                              .Returns(regionAdapter);
                 ContainerLocator.ResetContainer();
-                ContainerLocator.SetContainerExtension(() => containerMock.Object);
+                ContainerLocator.SetContainerExtension(() => containerMock);
 
                 regionAdapterMappings.RegisterMapping<ItemsControl, MockRegionAdapter>();
 

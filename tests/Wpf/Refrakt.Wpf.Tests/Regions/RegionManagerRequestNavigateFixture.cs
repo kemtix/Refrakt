@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Moq;
+using NSubstitute;
 using Refrakt.Regions;
 using Xunit;
 
@@ -18,16 +18,16 @@ namespace Refrakt.Wpf.Tests.Regions
         private static NavigationParameters parameters = new NavigationParameters();
         private static Action<NavigationResult> callback = (_) => { };
 
-        private static Mock<IRegion> mockRegion;
+        private static IRegion mockRegion;
         private static RegionManager regionManager;
 
         public RegionManagerRequestNavigateFixture()
         {
-            mockRegion = new Mock<IRegion>();
-            mockRegion.SetupGet((r) => r.Name).Returns(region);
+            mockRegion = Substitute.For<IRegion>();
+            mockRegion.Name.Returns(region);
 
             regionManager = new RegionManager();
-            regionManager.Regions.Add(mockRegion.Object);
+            regionManager.Regions.Add(mockRegion);
         }
 
         [Fact]
@@ -76,56 +76,56 @@ namespace Refrakt.Wpf.Tests.Regions
         public void DelegatesCallToRegion_RegionSource()
         {
             regionManager.RequestNavigate(region, source);
-            mockRegion.Verify((r) => r.RequestNavigate(sourceUri, It.IsAny<Action<NavigationResult>>()));
+            mockRegion.Received().RequestNavigate(sourceUri, Arg.Any<Action<NavigationResult>>());
         }
 
         [Fact]
         public void DelegatesCallToRegion_RegionTarget()
         {
             regionManager.RequestNavigate(region, sourceUri);
-            mockRegion.Verify((r) => r.RequestNavigate(sourceUri, It.IsAny<Action<NavigationResult>>()));
+            mockRegion.Received().RequestNavigate(sourceUri, Arg.Any<Action<NavigationResult>>());
         }
 
         [Fact]
         public void DelegatesCallToRegion_RegionSourceParameters()
         {
             regionManager.RequestNavigate(region, source, parameters);
-            mockRegion.Verify((r) => r.RequestNavigate(sourceUri, It.IsAny<Action<NavigationResult>>(), parameters));
+            mockRegion.Received().RequestNavigate(sourceUri, Arg.Any<Action<NavigationResult>>(), parameters);
         }
 
         [Fact]
         public void DelegatesCallToRegion_RegionSourceUriParameters()
         {
             regionManager.RequestNavigate(region, sourceUri, parameters);
-            mockRegion.Verify((r) => r.RequestNavigate(sourceUri, It.IsAny<Action<NavigationResult>>(), parameters));
+            mockRegion.Received().RequestNavigate(sourceUri, Arg.Any<Action<NavigationResult>>(), parameters);
         }
 
         [Fact]
         public void DelegatesCallToRegion_RegionSourceCallback()
         {
             regionManager.RequestNavigate(region, source, callback);
-            mockRegion.Verify((r) => r.RequestNavigate(sourceUri, callback));
+            mockRegion.Received().RequestNavigate(sourceUri, callback);
         }
 
         [Fact]
         public void DelegatesCallToRegion_RegionTargetCallback()
         {
             regionManager.RequestNavigate(region, sourceUri, callback);
-            mockRegion.Verify((r) => r.RequestNavigate(sourceUri, callback));
+            mockRegion.Received().RequestNavigate(sourceUri, callback);
         }
 
         [Fact]
         public void DelegatesCallToRegion_RegionSourceCallbackParameters()
         {
             regionManager.RequestNavigate(region, source, callback, parameters);
-            mockRegion.Verify((r) => r.RequestNavigate(sourceUri, callback, parameters));
+            mockRegion.Received().RequestNavigate(sourceUri, callback, parameters);
         }
 
         [Fact]
         public void DelegatesCallToRegion_RegionSourceUriCallbackParameters()
         {
             regionManager.RequestNavigate(region, sourceUri, callback, parameters);
-            mockRegion.Verify((r) => r.RequestNavigate(sourceUri, callback, parameters));
+            mockRegion.Received().RequestNavigate(sourceUri, callback, parameters);
         }
     }
 }

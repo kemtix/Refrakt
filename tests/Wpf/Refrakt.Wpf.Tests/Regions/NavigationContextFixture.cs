@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Moq;
+using NSubstitute;
 using Refrakt.Regions;
 using Xunit;
 
@@ -14,16 +14,16 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             var uri = new Uri("test?name=value", UriKind.Relative);
 
-            var navigationJournalMock = new Mock<IRegionNavigationJournal>();
-            var navigationServiceMock = new Mock<IRegionNavigationService>();
+            var navigationJournalMock = Substitute.For<IRegionNavigationJournal>();
+            var navigationServiceMock = Substitute.For<IRegionNavigationService>();
 
             IRegion region = new Region();
-            navigationServiceMock.SetupGet(n => n.Region).Returns(region);
-            navigationServiceMock.SetupGet(x => x.Journal).Returns(navigationJournalMock.Object);
+            navigationServiceMock.Region.Returns(region);
+            navigationServiceMock.Journal.Returns(navigationJournalMock);
 
-            var context = new NavigationContext(navigationServiceMock.Object, uri);
+            var context = new NavigationContext(navigationServiceMock, uri);
 
-            Assert.Same(navigationServiceMock.Object, context.NavigationService);
+            Assert.Same(navigationServiceMock, context.NavigationService);
             Assert.Equal(uri, context.Uri);
             Assert.Single(context.Parameters);
             Assert.Equal("value", context.Parameters["name"]);
@@ -34,14 +34,14 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             var uri = new Uri("test", UriKind.Relative);
 
-            var navigationJournalMock = new Mock<IRegionNavigationJournal>();
+            var navigationJournalMock = Substitute.For<IRegionNavigationJournal>();
 
-            var navigationServiceMock = new Mock<IRegionNavigationService>();
-            navigationServiceMock.SetupGet(x => x.Journal).Returns(navigationJournalMock.Object);
+            var navigationServiceMock = Substitute.For<IRegionNavigationService>();
+            navigationServiceMock.Journal.Returns(navigationJournalMock);
 
-            var context = new NavigationContext(navigationServiceMock.Object, uri);
+            var context = new NavigationContext(navigationServiceMock, uri);
 
-            Assert.Same(navigationServiceMock.Object, context.NavigationService);
+            Assert.Same(navigationServiceMock, context.NavigationService);
             Assert.Equal(uri, context.Uri);
             Assert.Empty(context.Parameters);
         }

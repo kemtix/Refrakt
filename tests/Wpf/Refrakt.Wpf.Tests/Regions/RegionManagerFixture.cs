@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using Moq;
+using NSubstitute;
 using Refrakt.Ioc;
 using Refrakt.Regions;
 using Refrakt.Wpf.Tests.Mocks;
@@ -342,9 +342,9 @@ namespace Refrakt.Wpf.Tests.Regions
                     viewType = type;
                     return null;
                 };
-                var containerMock = new Mock<IContainerExtension>();
-                containerMock.Setup(c => c.Resolve(typeof(IRegionViewRegistry))).Returns(mockRegionContentRegistry);
-                ContainerLocator.SetContainerExtension(() => containerMock.Object);
+                var containerMock = Substitute.For<IContainerExtension>();
+                containerMock.Resolve(typeof(IRegionViewRegistry)).Returns(mockRegionContentRegistry);
+                ContainerLocator.SetContainerExtension(() => containerMock);
 
                 var regionManager = new RegionManager();
 
@@ -377,10 +377,10 @@ namespace Refrakt.Wpf.Tests.Regions
                     viewType = type;
                     return null;
                 };
-                var containerMock = new Mock<IContainerExtension>();
-                containerMock.Setup(c => c.Resolve(typeof(IRegionViewRegistry))).Returns(mockRegionContentRegistry);
+                var containerMock = Substitute.For<IContainerExtension>();
+                containerMock.Resolve(typeof(IRegionViewRegistry)).Returns(mockRegionContentRegistry);
                 ContainerLocator.ResetContainer();
-                ContainerLocator.SetContainerExtension(() => containerMock.Object);
+                ContainerLocator.SetContainerExtension(() => containerMock);
 
                 var regionManager = new RegionManager();
 
@@ -415,9 +415,9 @@ namespace Refrakt.Wpf.Tests.Regions
                     contentDelegate = usedDelegate;
                     return null;
                 };
-                var containerMock = new Mock<IContainerExtension>();
-                containerMock.Setup(c => c.Resolve(typeof(IRegionViewRegistry))).Returns(mockRegionContentRegistry);
-                ContainerLocator.SetContainerExtension(() => containerMock.Object);
+                var containerMock = Substitute.For<IContainerExtension>();
+                containerMock.Resolve(typeof(IRegionViewRegistry)).Returns(mockRegionContentRegistry);
+                ContainerLocator.SetContainerExtension(() => containerMock);
 
                 var regionManager = new RegionManager();
 

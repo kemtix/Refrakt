@@ -2,7 +2,7 @@
 
 using System;
 using System.Windows;
-using Moq;
+using NSubstitute;
 using Refrakt.Regions;
 using Refrakt.Regions.Behaviors;
 using Refrakt.Wpf.Tests.Mocks;
@@ -43,8 +43,7 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
 
             ActiveAwareFrameworkElement activeAwareObject = new ActiveAwareFrameworkElement();
 
-            var frameworkElementMock = new Mock<FrameworkElement>();
-            var frameworkElement = frameworkElementMock.Object;
+            var frameworkElement = Substitute.For<FrameworkElement>();
             frameworkElement.DataContext = activeAwareObject;
 
             Assert.False(activeAwareObject.IsActive);
@@ -64,13 +63,9 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
             behavior.Attach();
             var collection = region.MockActiveViews.Items;
 
-            var activeAwareMock = new Mock<IActiveAware>();
-            activeAwareMock.SetupProperty(o => o.IsActive);
-            var activeAwareObject = activeAwareMock.Object;
+            var activeAwareObject = Substitute.For<IActiveAware>();
 
-            var frameworkElementMock = new Mock<FrameworkElement>();
-            frameworkElementMock.As<IActiveAware>().SetupProperty(o => o.IsActive);
-            var frameworkElement = frameworkElementMock.Object;
+            var frameworkElement = Substitute.For<FrameworkElement, IActiveAware>();
             frameworkElement.DataContext = activeAwareObject;
 
             Assert.False(((IActiveAware)frameworkElement).IsActive);
@@ -119,8 +114,7 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
             behavior.Attach();
             var collection = region.MockActiveViews.Items;
 
-            var frameworkElementMock = new Mock<FrameworkElement>();
-            var frameworkElement = frameworkElementMock.Object;
+            var frameworkElement = Substitute.For<FrameworkElement>();
             frameworkElement.DataContext = new object();
 
 

@@ -1,6 +1,6 @@
 
 
-using Moq;
+using NSubstitute;
 using Refrakt.Regions;
 using Refrakt.Regions.Behaviors;
 using Refrakt.Wpf.Tests.Mocks;
@@ -37,34 +37,34 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
         public void WhenIRegionMemberLifetimeItemReturnsKeepAliveFalseRemovesWhenInactive()
         {
             // Arrange
-            var regionItemMock = new Mock<IRegionMemberLifetime>();
-            regionItemMock.Setup(i => i.KeepAlive).Returns(false);
+            var regionItemMock = Substitute.For<IRegionMemberLifetime>();
+            regionItemMock.KeepAlive.Returns(false);
 
-            Region.Add(regionItemMock.Object);
-            Region.Activate(regionItemMock.Object);
+            Region.Add(regionItemMock);
+            Region.Activate(regionItemMock);
 
             // Act
-            Region.Deactivate(regionItemMock.Object);
+            Region.Deactivate(regionItemMock);
 
             // Assert
-            Assert.False(Region.Views.Contains(regionItemMock.Object));
+            Assert.False(Region.Views.Contains(regionItemMock));
         }
 
         [Fact]
         public void WhenIRegionMemberLifetimeItemReturnsKeepAliveTrueDoesNotRemoveOnDeactivation()
         {
             // Arrange
-            var regionItemMock = new Mock<IRegionMemberLifetime>();
-            regionItemMock.Setup(i => i.KeepAlive).Returns(true);
+            var regionItemMock = Substitute.For<IRegionMemberLifetime>();
+            regionItemMock.KeepAlive.Returns(true);
 
-            Region.Add(regionItemMock.Object);
-            Region.Activate(regionItemMock.Object);
+            Region.Add(regionItemMock);
+            Region.Activate(regionItemMock);
 
             // Act
-            Region.Deactivate(regionItemMock.Object);
+            Region.Deactivate(regionItemMock);
 
             // Assert
-            Assert.True(Region.Views.Contains(regionItemMock.Object));
+            Assert.True(Region.Views.Contains(regionItemMock));
 
         }
 
@@ -72,10 +72,10 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
         public void WhenIRegionMemberLifetimeItemReturnsKeepAliveFalseCanRemoveFromRegion()
         {
             // Arrange
-            var regionItemMock = new Mock<IRegionMemberLifetime>();
-            regionItemMock.Setup(i => i.KeepAlive).Returns(false);
+            var regionItemMock = Substitute.For<IRegionMemberLifetime>();
+            regionItemMock.KeepAlive.Returns(false);
 
-            var view = regionItemMock.Object;
+            var view = regionItemMock;
 
             Region.Add(view);
             Region.Activate(view);
@@ -98,58 +98,58 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
         public void WhenRegionContainsMultipleMembers_OnlyRemovesThoseDeactivated()
         {
             // Arrange
-            var firstMockItem = new Mock<IRegionMemberLifetime>();
-            firstMockItem.Setup(i => i.KeepAlive).Returns(true);
+            var firstMockItem = Substitute.For<IRegionMemberLifetime>();
+            firstMockItem.KeepAlive.Returns(true);
 
-            var secondMockItem = new Mock<IRegionMemberLifetime>();
-            secondMockItem.Setup(i => i.KeepAlive).Returns(false);
+            var secondMockItem = Substitute.For<IRegionMemberLifetime>();
+            secondMockItem.KeepAlive.Returns(false);
 
-            Region.Add(firstMockItem.Object);
-            Region.Activate(firstMockItem.Object);
+            Region.Add(firstMockItem);
+            Region.Activate(firstMockItem);
 
-            Region.Add(secondMockItem.Object);
-            Region.Activate(secondMockItem.Object);
+            Region.Add(secondMockItem);
+            Region.Activate(secondMockItem);
 
             // Act
-            Region.Deactivate(secondMockItem.Object);
+            Region.Deactivate(secondMockItem);
 
             // Assert
-            Assert.True(Region.Views.Contains(firstMockItem.Object));
-            Assert.False(Region.Views.Contains(secondMockItem.Object));
+            Assert.True(Region.Views.Contains(firstMockItem));
+            Assert.False(Region.Views.Contains(secondMockItem));
         }
 
         [Fact]
         public void WhenMemberNeverActivatedThenIsNotRemovedOnAnothersDeactivation()
         {
             // Arrange
-            var firstMockItem = new Mock<IRegionMemberLifetime>();
-            firstMockItem.Setup(i => i.KeepAlive).Returns(false);
+            var firstMockItem = Substitute.For<IRegionMemberLifetime>();
+            firstMockItem.KeepAlive.Returns(false);
 
-            var secondMockItem = new Mock<IRegionMemberLifetime>();
-            secondMockItem.Setup(i => i.KeepAlive).Returns(false);
+            var secondMockItem = Substitute.For<IRegionMemberLifetime>();
+            secondMockItem.KeepAlive.Returns(false);
 
-            Region.Add(firstMockItem.Object);  // Never activated
+            Region.Add(firstMockItem);  // Never activated
 
-            Region.Add(secondMockItem.Object);
-            Region.Activate(secondMockItem.Object);
+            Region.Add(secondMockItem);
+            Region.Activate(secondMockItem);
 
             // Act
-            Region.Deactivate(secondMockItem.Object);
+            Region.Deactivate(secondMockItem);
 
             // Assert
-            Assert.True(Region.Views.Contains(firstMockItem.Object));
-            Assert.False(Region.Views.Contains(secondMockItem.Object));
+            Assert.True(Region.Views.Contains(firstMockItem));
+            Assert.False(Region.Views.Contains(secondMockItem));
         }
 
         [StaFact]
         public virtual void RemovesRegionItemIfDataContextReturnsKeepAliveFalse()
         {
             // Arrange
-            var regionItemMock = new Mock<IRegionMemberLifetime>();
-            regionItemMock.Setup(i => i.KeepAlive).Returns(false);
+            var regionItemMock = Substitute.For<IRegionMemberLifetime>();
+            regionItemMock.KeepAlive.Returns(false);
 
             var regionItem = new MockFrameworkElement();
-            regionItem.DataContext = regionItemMock.Object;
+            regionItem.DataContext = regionItemMock;
 
             Region.Add(regionItem);
             Region.Activate(regionItem);
@@ -165,19 +165,19 @@ namespace Refrakt.Wpf.Tests.Regions.Behaviors
         public virtual void RemovesOnlyDeactivatedItemsInRegionBasedOnDataContextKeepAlive()
         {
             // Arrange
-            var retionItemDataContextToKeepAlive = new Mock<IRegionMemberLifetime>();
-            retionItemDataContextToKeepAlive.Setup(i => i.KeepAlive).Returns(true);
+            var retionItemDataContextToKeepAlive = Substitute.For<IRegionMemberLifetime>();
+            retionItemDataContextToKeepAlive.KeepAlive.Returns(true);
 
             var regionItemToKeepAlive = new MockFrameworkElement();
-            regionItemToKeepAlive.DataContext = retionItemDataContextToKeepAlive.Object;
+            regionItemToKeepAlive.DataContext = retionItemDataContextToKeepAlive;
             Region.Add(regionItemToKeepAlive);
             Region.Activate(regionItemToKeepAlive);
 
-            var regionItemMock = new Mock<IRegionMemberLifetime>();
-            regionItemMock.Setup(i => i.KeepAlive).Returns(false);
+            var regionItemMock = Substitute.For<IRegionMemberLifetime>();
+            regionItemMock.KeepAlive.Returns(false);
 
             var regionItem = new MockFrameworkElement();
-            regionItem.DataContext = regionItemMock.Object;
+            regionItem.DataContext = regionItemMock;
 
             Region.Add(regionItem);
             Region.Activate(regionItem);
