@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using Refrakt.Mvvm;
 using Refrakt.Tests.Mocks.ViewModels;
 using Refrakt.Tests.Mocks.Views;
@@ -160,12 +159,74 @@ namespace Refrakt.Tests.Mvvm
             });
         }
 
+        [Fact]
+        public void ResetShouldRemoveRegisteredFactories()
+        {
+            ViewModelLocationProvider.Register<Mock>(() => "x");
+
+            ResetViewModelLocationProvider();
+
+            Assert.IsType<MockViewModel>(AutoWire(new Mock()));
+        }
+
+        [Fact]
+        public void ResetShouldRemoveRegisteredTypes()
+        {
+            ViewModelLocationProvider.Register<Mock, ViewModelLocationProviderFixture>();
+
+            ResetViewModelLocationProvider();
+
+            Assert.IsType<MockViewModel>(AutoWire(new Mock()));
+        }
+
+        [Fact]
+        public void ResetShouldRestoreDefaultViewModelFactory()
+        {
+            ViewModelLocationProvider.SetDefaultViewModelFactory(viewModelType => "x");
+
+            ResetViewModelLocationProvider();
+
+            Assert.IsType<MockViewModel>(AutoWire(new Mock()));
+        }
+
+        [Fact]
+        public void ResetShouldRestoreDefaultViewModelFactoryWithViewParameter()
+        {
+            ViewModelLocationProvider.SetDefaultViewModelFactory((view, viewModelType) => "x");
+
+            ResetViewModelLocationProvider();
+
+            Assert.IsType<MockViewModel>(AutoWire(new Mock()));
+        }
+
+        [Fact]
+        public void ResetShouldRestoreDefaultViewTypeToViewModelTypeResolver()
+        {
+            ViewModelLocationProvider.SetDefaultViewTypeToViewModelTypeResolver(viewType => typeof(ViewModelLocationProviderFixture));
+
+            ResetViewModelLocationProvider();
+
+            Assert.IsType<MockViewModel>(AutoWire(new Mock()));
+        }
+
+        [Fact]
+        public void ResetHelperShouldNameTheMissingField()
+        {
+            var ex = Assert.Throws<InvalidOperationException>(() => ViewModelLocationProviderReset.GetStaticField("_missingField"));
+
+            Assert.Equal("ViewModelLocationProvider has no static field '_missingField'; update ViewModelLocationProviderReset.", ex.Message);
+        }
+
+        private static object AutoWire(object view)
+        {
+            object viewModel = null;
+            ViewModelLocationProvider.AutoWireViewModelChanged(view, (v, vm) => viewModel = vm);
+            return viewModel;
+        }
+
         private static void ResetViewModelLocationProvider()
         {
-            Type staticType = typeof(ViewModelLocationProvider);
-            ConstructorInfo ci = staticType.GetTypeInfo().TypeInitializer;
-            object[] parameters = new object[0];
-            ci.Invoke(null, parameters);
+            ViewModelLocationProviderReset.Reset();
         }
     }
 }

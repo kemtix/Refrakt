@@ -26,6 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\Refrakt.Core.Tests\Mvvm\ViewModelLocationProviderReset.cs" Link="Mvvm\ViewModelLocationProviderReset.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Mocks\Modules\*.cs" />
     <Page Remove="Modularity\ModuleCatalogXaml\InvalidDependencyModuleCatalog.xaml" />
     <Resource Include="Modularity\ModuleCatalogXaml\InvalidDependencyModuleCatalog.xaml">

@@ -1,6 +1,5 @@
-﻿using System;
-using System.Reflection;
-using Refrakt.Mvvm;
+﻿using Refrakt.Mvvm;
+using Refrakt.Tests.Mvvm;
 using Refrakt.Wpf.Tests.Mocks.ViewModels;
 using Refrakt.Wpf.Tests.Mocks.Views;
 using Xunit;
@@ -85,10 +84,7 @@ namespace Refrakt.Wpf.Tests.Mvvm
 
         internal static void ResetViewModelLocationProvider()
         {
-            Type staticType = typeof(ViewModelLocationProvider);
-            ConstructorInfo ci = staticType.TypeInitializer;
-            object[] parameters = new object[0];
-            ci.Invoke(null, parameters);
+            ViewModelLocationProviderReset.Reset();
         }
     }
 }
