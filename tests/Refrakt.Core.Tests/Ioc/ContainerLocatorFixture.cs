@@ -1,4 +1,4 @@
-﻿using Moq;
+﻿using NSubstitute;
 using Refrakt.Ioc;
 using Xunit;
 
@@ -19,7 +19,7 @@ namespace Refrakt.Tests.Ioc
         {
             Refrakt.Ioc.ContainerLocator.ResetContainer();
             Assert.Null(Refrakt.Ioc.ContainerLocator.Current);
-            Refrakt.Ioc.ContainerLocator.SetContainerExtension(() => new Mock<IContainerExtension>().Object);
+            Refrakt.Ioc.ContainerLocator.SetContainerExtension(() => Substitute.For<IContainerExtension>());
             Assert.NotNull(Refrakt.Ioc.ContainerLocator.Current);
         }
 
@@ -28,7 +28,7 @@ namespace Refrakt.Tests.Ioc
         {
             Refrakt.Ioc.ContainerLocator.ResetContainer();
             Assert.Null(Refrakt.Ioc.ContainerLocator.Current);
-            Refrakt.Ioc.ContainerLocator.SetContainerExtension(() => new Mock<IContainerExtension>().Object);
+            Refrakt.Ioc.ContainerLocator.SetContainerExtension(() => Substitute.For<IContainerExtension>());
             Assert.NotNull(Refrakt.Ioc.ContainerLocator.Current);
             Refrakt.Ioc.ContainerLocator.ResetContainer();
             Assert.Null(Refrakt.Ioc.ContainerLocator.Current);
@@ -38,8 +38,8 @@ namespace Refrakt.Tests.Ioc
         public void FactoryOnlySetsContainerOnce()
         {
             Refrakt.Ioc.ContainerLocator.ResetContainer();
-            var container = new Mock<IContainerExtension>().Object;
-            var container2 = new Mock<IContainerExtension>().Object;
+            var container = Substitute.For<IContainerExtension>();
+            var container2 = Substitute.For<IContainerExtension>();
 
             Refrakt.Ioc.ContainerLocator.SetContainerExtension(() => container);
             Assert.Same(container, Refrakt.Ioc.ContainerLocator.Container);
