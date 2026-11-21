@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Moq;
+using NSubstitute;
 using Refrakt.Ioc;
 using Refrakt.Modularity;
 using Refrakt.Wpf.Tests.Mocks;
@@ -335,10 +335,10 @@ namespace Refrakt.Wpf.Tests.Modularity
         [Fact]
         public void ModuleManagerIsDisposable()
         {
-            Mock<IModuleInitializer> mockInit = new Mock<IModuleInitializer>();
+            IModuleInitializer mockInit = Substitute.For<IModuleInitializer>();
             var moduleInfo = CreateModuleInfo("needsRetrieval", InitializationMode.WhenAvailable);
-            var catalog = new Mock<IModuleCatalog>();
-            ModuleManager manager = new ModuleManager(mockInit.Object, catalog.Object);
+            var catalog = Substitute.For<IModuleCatalog>();
+            ModuleManager manager = new ModuleManager(mockInit, catalog);
 
             IDisposable disposableManager = manager as IDisposable;
             Assert.NotNull(disposableManager);
@@ -347,13 +347,13 @@ namespace Refrakt.Wpf.Tests.Modularity
         [Fact]
         public void DisposeDoesNotThrowWithNonDisposableTypeLoaders()
         {
-            Mock<IModuleInitializer> mockInit = new Mock<IModuleInitializer>();
+            IModuleInitializer mockInit = Substitute.For<IModuleInitializer>();
             var moduleInfo = CreateModuleInfo("needsRetrieval", InitializationMode.WhenAvailable);
-            var catalog = new Mock<IModuleCatalog>();
-            ModuleManager manager = new ModuleManager(mockInit.Object, catalog.Object);
+            var catalog = Substitute.For<IModuleCatalog>();
+            ModuleManager manager = new ModuleManager(mockInit, catalog);
 
-            var mockTypeLoader = new Mock<IModuleTypeLoader>();
-            manager.ModuleTypeLoaders = new List<IModuleTypeLoader> { mockTypeLoader.Object };
+            var mockTypeLoader = Substitute.For<IModuleTypeLoader>();
+            manager.ModuleTypeLoaders = new List<IModuleTypeLoader> { mockTypeLoader };
 
             try
             {
@@ -368,37 +368,35 @@ namespace Refrakt.Wpf.Tests.Modularity
         [Fact]
         public void DisposeCleansUpDisposableTypeLoaders()
         {
-            Mock<IModuleInitializer> mockInit = new Mock<IModuleInitializer>();
+            IModuleInitializer mockInit = Substitute.For<IModuleInitializer>();
             var moduleInfo = CreateModuleInfo("needsRetrieval", InitializationMode.WhenAvailable);
-            var catalog = new Mock<IModuleCatalog>();
-            ModuleManager manager = new ModuleManager(mockInit.Object, catalog.Object);
+            var catalog = Substitute.For<IModuleCatalog>();
+            ModuleManager manager = new ModuleManager(mockInit, catalog);
 
-            var mockTypeLoader = new Mock<IModuleTypeLoader>();
-            var disposableMockTypeLoader = mockTypeLoader.As<IDisposable>();
-            disposableMockTypeLoader.Setup(loader => loader.Dispose());
+            var mockTypeLoader = Substitute.For<IModuleTypeLoader, IDisposable>();
+            var disposableMockTypeLoader = (IDisposable)mockTypeLoader;
 
-            manager.ModuleTypeLoaders = new List<IModuleTypeLoader> { mockTypeLoader.Object };
+            manager.ModuleTypeLoaders = new List<IModuleTypeLoader> { mockTypeLoader };
 
             manager.Dispose();
 
-            disposableMockTypeLoader.Verify(loader => loader.Dispose(), Times.Once());
+            disposableMockTypeLoader.Received(1).Dispose();
         }
 
         [Fact]
         public void DisposeDoesNotThrowWithMixedTypeLoaders()
         {
-            Mock<IModuleInitializer> mockInit = new Mock<IModuleInitializer>();
+            IModuleInitializer mockInit = Substitute.For<IModuleInitializer>();
             var moduleInfo = CreateModuleInfo("needsRetrieval", InitializationMode.WhenAvailable);
-            var catalog = new Mock<IModuleCatalog>();
-            ModuleManager manager = new ModuleManager(mockInit.Object, catalog.Object);
+            var catalog = Substitute.For<IModuleCatalog>();
+            ModuleManager manager = new ModuleManager(mockInit, catalog);
 
-            var mockTypeLoader1 = new Mock<IModuleTypeLoader>();
+            var mockTypeLoader1 = Substitute.For<IModuleTypeLoader>();
 
-            var mockTypeLoader = new Mock<IModuleTypeLoader>();
-            var disposableMockTypeLoader = mockTypeLoader.As<IDisposable>();
-            disposableMockTypeLoader.Setup(loader => loader.Dispose());
+            var mockTypeLoader = Substitute.For<IModuleTypeLoader, IDisposable>();
+            var disposableMockTypeLoader = (IDisposable)mockTypeLoader;
 
-            manager.ModuleTypeLoaders = new List<IModuleTypeLoader>() { mockTypeLoader1.Object, mockTypeLoader.Object };
+            manager.ModuleTypeLoaders = new List<IModuleTypeLoader>() { mockTypeLoader1, mockTypeLoader };
 
             try
             {
@@ -409,7 +407,7 @@ namespace Refrakt.Wpf.Tests.Modularity
                 //Assert.Fail();
             }
 
-            disposableMockTypeLoader.Verify(loader => loader.Dispose(), Times.Once());
+            disposableMockTypeLoader.Received(1).Dispose();
         }
         private static ModuleInfo CreateModuleInfo(string name, InitializationMode initializationMode, params string[] dependsOn)
         {

@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using Moq;
+using NSubstitute;
 using Refrakt.Events;
 using Refrakt.Ioc;
 using Refrakt.Modularity;
@@ -191,28 +191,28 @@ namespace Refrakt.Wpf.Tests
         [Fact]
         public void RequiredTypesAreRegistered()
         {
-            application.MockContainer.Verify(x => x.RegisterInstance(typeof(IModuleCatalog), It.IsAny<IModuleCatalog>()), Times.Once);
+            application.MockContainer.Received(1).RegisterInstance(typeof(IModuleCatalog), Arg.Any<IModuleCatalog>());
 
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(IDialogService), typeof(DialogService)), Times.Once);
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(IModuleInitializer), typeof(ModuleInitializer)), Times.Once);
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(IModuleManager), typeof(ModuleManager)), Times.Once);
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(RegionAdapterMappings), typeof(RegionAdapterMappings)), Times.Once);
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(IRegionManager), typeof(RegionManager)), Times.Once);
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(IRegionNavigationContentLoader), typeof(RegionNavigationContentLoader)), Times.Once);
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(IEventAggregator), typeof(EventAggregator)), Times.Once);
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(IRegionViewRegistry), typeof(RegionViewRegistry)), Times.Once);
-            application.MockContainer.Verify(x => x.RegisterSingleton(typeof(IRegionBehaviorFactory), typeof(RegionBehaviorFactory)), Times.Once);
+            application.MockContainer.Received(1).RegisterSingleton(typeof(IDialogService), typeof(DialogService));
+            application.MockContainer.Received(1).RegisterSingleton(typeof(IModuleInitializer), typeof(ModuleInitializer));
+            application.MockContainer.Received(1).RegisterSingleton(typeof(IModuleManager), typeof(ModuleManager));
+            application.MockContainer.Received(1).RegisterSingleton(typeof(RegionAdapterMappings), typeof(RegionAdapterMappings));
+            application.MockContainer.Received(1).RegisterSingleton(typeof(IRegionManager), typeof(RegionManager));
+            application.MockContainer.Received(1).RegisterSingleton(typeof(IRegionNavigationContentLoader), typeof(RegionNavigationContentLoader));
+            application.MockContainer.Received(1).RegisterSingleton(typeof(IEventAggregator), typeof(EventAggregator));
+            application.MockContainer.Received(1).RegisterSingleton(typeof(IRegionViewRegistry), typeof(RegionViewRegistry));
+            application.MockContainer.Received(1).RegisterSingleton(typeof(IRegionBehaviorFactory), typeof(RegionBehaviorFactory));
 
-            application.MockContainer.Verify(x => x.Register(typeof(IRegionNavigationJournalEntry), typeof(RegionNavigationJournalEntry)), Times.Once);
-            application.MockContainer.Verify(x => x.Register(typeof(IRegionNavigationJournal), typeof(RegionNavigationJournal)), Times.Once);
-            application.MockContainer.Verify(x => x.Register(typeof(IRegionNavigationService), typeof(RegionNavigationService)), Times.Once);
-            application.MockContainer.Verify(x => x.Register(typeof(IDialogWindow), typeof(DialogWindow)), Times.Once);
+            application.MockContainer.Received(1).Register(typeof(IRegionNavigationJournalEntry), typeof(RegionNavigationJournalEntry));
+            application.MockContainer.Received(1).Register(typeof(IRegionNavigationJournal), typeof(RegionNavigationJournal));
+            application.MockContainer.Received(1).Register(typeof(IRegionNavigationService), typeof(RegionNavigationService));
+            application.MockContainer.Received(1).Register(typeof(IDialogWindow), typeof(DialogWindow));
         }
     }
 
     public class RefraktApplication : RefraktApplicationBase
     {
-        public Mock<IContainerExtension> MockContainer { get; private set; }
+        public IContainerExtension MockContainer { get; private set; }
 
         public IModuleCatalog DefaultModuleCatalog => Container.Resolve<IModuleCatalog>();
 
@@ -245,7 +245,7 @@ namespace Refrakt.Wpf.Tests
             InitializeCalled = true;
 
             ContainerLocator.ResetContainer();
-            MockContainer = new Mock<IContainerExtension>();
+            MockContainer = Substitute.For<IContainerExtension>();
 
             base.Initialize();
         }
@@ -253,7 +253,7 @@ namespace Refrakt.Wpf.Tests
         protected override IContainerExtension CreateContainerExtension()
         {
             CreateContainerExtensionCalled = true;
-            return MockContainer.Object;
+            return MockContainer;
         }
 
         protected override void ConfigureViewModelLocator()
@@ -269,7 +269,7 @@ namespace Refrakt.Wpf.Tests
             CreateModuleCatalogCalled = true;
 
             var moduleCatalog = base.CreateModuleCatalog();
-            MockContainer.Setup(x => x.Resolve(typeof(IModuleCatalog))).Returns(moduleCatalog);
+            MockContainer.Resolve(typeof(IModuleCatalog)).Returns(moduleCatalog);
             return moduleCatalog;
         }
 
@@ -290,18 +290,20 @@ namespace Refrakt.Wpf.Tests
 
             base.RegisterRequiredTypes(containerRegistry);
 
-            var moduleInitializer = new ModuleInitializer(MockContainer.Object);
-            MockContainer.Setup(x => x.Resolve(typeof(IModuleInitializer))).Returns(moduleInitializer);
-            MockContainer.Setup(x => x.Resolve(typeof(IModuleManager))).Returns(new ModuleManager(moduleInitializer, DefaultModuleCatalog));
-            MockContainer.Setup(x => x.Resolve(typeof(IRegionBehaviorFactory))).Returns(new RegionBehaviorFactory(MockContainer.Object));
+            var moduleInitializer = new ModuleInitializer(MockContainer);
+            MockContainer.Resolve(typeof(IModuleInitializer)).Returns(moduleInitializer);
+            // DefaultModuleCatalog calls the substitute: compute it before the Resolve(...).Returns(...) call.
+            var moduleManager = new ModuleManager(moduleInitializer, DefaultModuleCatalog);
+            MockContainer.Resolve(typeof(IModuleManager)).Returns(moduleManager);
+            MockContainer.Resolve(typeof(IRegionBehaviorFactory)).Returns(new RegionBehaviorFactory(MockContainer));
 
-            var regionBehaviorFactory = new RegionBehaviorFactory(MockContainer.Object);
-            MockContainer.Setup(x => x.Resolve(typeof(IRegionBehaviorFactory))).Returns(regionBehaviorFactory);
+            var regionBehaviorFactory = new RegionBehaviorFactory(MockContainer);
+            MockContainer.Resolve(typeof(IRegionBehaviorFactory)).Returns(regionBehaviorFactory);
 
-            MockContainer.Setup(x => x.Resolve(typeof(RegionAdapterMappings))).Returns(new RegionAdapterMappings());
-            MockContainer.Setup(x => x.Resolve(typeof(SelectorRegionAdapter))).Returns(new SelectorRegionAdapter(regionBehaviorFactory));
-            MockContainer.Setup(x => x.Resolve(typeof(ItemsControlRegionAdapter))).Returns(new ItemsControlRegionAdapter(regionBehaviorFactory));
-            MockContainer.Setup(x => x.Resolve(typeof(ContentControlRegionAdapter))).Returns(new ContentControlRegionAdapter(regionBehaviorFactory));
+            MockContainer.Resolve(typeof(RegionAdapterMappings)).Returns(new RegionAdapterMappings());
+            MockContainer.Resolve(typeof(SelectorRegionAdapter)).Returns(new SelectorRegionAdapter(regionBehaviorFactory));
+            MockContainer.Resolve(typeof(ItemsControlRegionAdapter)).Returns(new ItemsControlRegionAdapter(regionBehaviorFactory));
+            MockContainer.Resolve(typeof(ContentControlRegionAdapter)).Returns(new ContentControlRegionAdapter(regionBehaviorFactory));
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)

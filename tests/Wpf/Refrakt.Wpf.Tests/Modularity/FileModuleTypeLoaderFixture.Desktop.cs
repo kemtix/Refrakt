@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.ObjectModel;
-using Moq;
+using NSubstitute;
 using Refrakt.Modularity;
 using Xunit;
 
@@ -86,22 +86,21 @@ namespace Refrakt.Wpf.Tests.Modularity
         [Fact]
         public void FileModuleTypeLoaderDisposeNukesAssemblyResolver()
         {
-            Mock<IAssemblyResolver> mockResolver = new Mock<IAssemblyResolver>();
-            var disposableMockResolver = mockResolver.As<IDisposable>();
-            disposableMockResolver.Setup(resolver => resolver.Dispose());
+            IAssemblyResolver mockResolver = Substitute.For<IAssemblyResolver, IDisposable>();
+            var disposableMockResolver = (IDisposable)mockResolver;
 
-            var typeLoader = new FileModuleTypeLoader(mockResolver.Object);
+            var typeLoader = new FileModuleTypeLoader(mockResolver);
 
             typeLoader.Dispose();
 
-            disposableMockResolver.Verify(resolver => resolver.Dispose(), Times.Once());
+            disposableMockResolver.Received(1).Dispose();
         }
 
         [Fact]
         public void FileModuleTypeLoaderDisposeDoesNotThrowWithNonDisposableAssemblyResolver()
         {
-            Mock<IAssemblyResolver> mockResolver = new Mock<IAssemblyResolver>();
-            var typeLoader = new FileModuleTypeLoader(mockResolver.Object);
+            IAssemblyResolver mockResolver = Substitute.For<IAssemblyResolver>();
+            var typeLoader = new FileModuleTypeLoader(mockResolver);
             try
             {
                 typeLoader.Dispose();

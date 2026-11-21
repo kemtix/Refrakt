@@ -1,4 +1,4 @@
-﻿using Moq;
+﻿using NSubstitute;
 using Refrakt.Modularity;
 using Refrakt.Wpf.Tests.Mocks.Modules;
 using Xunit;
@@ -14,9 +14,9 @@ namespace Refrakt.Wpf.Tests.Modularity
             {
                 new ModuleInfo(typeof(MockModuleA))
             };
-            var moduleCatalogMock = new Mock<IModuleCatalog>();
-            moduleCatalogMock.Setup(c => c.Modules).Returns(modules);
-            IModuleManager manager = new ModuleManager(Mock.Of<IModuleInitializer>(), moduleCatalogMock.Object);
+            var moduleCatalogMock = Substitute.For<IModuleCatalog>();
+            moduleCatalogMock.Modules.Returns(modules);
+            IModuleManager manager = new ModuleManager(Substitute.For<IModuleInitializer>(), moduleCatalogMock);
 
             Assert.Same(modules, manager.Modules);
         }
@@ -25,9 +25,9 @@ namespace Refrakt.Wpf.Tests.Modularity
         public void ModuleManagerReturnsCorrectModuleStateWithGeneric()
         {
             var moduleInfo = new ModuleInfo(typeof(MockModuleA));
-            var moduleCatalogMock = new Mock<IModuleCatalog>();
-            moduleCatalogMock.Setup(c => c.Modules).Returns(new[] { moduleInfo });
-            IModuleManager manager = new ModuleManager(Mock.Of<IModuleInitializer>(), moduleCatalogMock.Object);
+            var moduleCatalogMock = Substitute.For<IModuleCatalog>();
+            moduleCatalogMock.Modules.Returns(new[] { moduleInfo });
+            IModuleManager manager = new ModuleManager(Substitute.For<IModuleInitializer>(), moduleCatalogMock);
 
             Assert.Equal(moduleInfo.State, manager.GetModuleState<MockModuleA>());
             moduleInfo.State = ModuleState.LoadingTypes;
@@ -38,9 +38,9 @@ namespace Refrakt.Wpf.Tests.Modularity
         public void ModuleManagerReturnsCorrectModuleStateWithName()
         {
             var moduleInfo = new ModuleInfo(typeof(MockModuleA));
-            var moduleCatalogMock = new Mock<IModuleCatalog>();
-            moduleCatalogMock.Setup(c => c.Modules).Returns(new[] { moduleInfo });
-            IModuleManager manager = new ModuleManager(Mock.Of<IModuleInitializer>(), moduleCatalogMock.Object);
+            var moduleCatalogMock = Substitute.For<IModuleCatalog>();
+            moduleCatalogMock.Modules.Returns(new[] { moduleInfo });
+            IModuleManager manager = new ModuleManager(Substitute.For<IModuleInitializer>(), moduleCatalogMock);
 
             Assert.Equal(moduleInfo.State, manager.GetModuleState(nameof(MockModuleA)));
             moduleInfo.State = ModuleState.LoadingTypes;
@@ -51,9 +51,9 @@ namespace Refrakt.Wpf.Tests.Modularity
         public void ModuleManagerReturnsCorrectInitializationStateWithGeneric()
         {
             var moduleInfo = new ModuleInfo(typeof(MockModuleA));
-            var moduleCatalogMock = new Mock<IModuleCatalog>();
-            moduleCatalogMock.Setup(c => c.Modules).Returns(new[] { moduleInfo });
-            IModuleManager manager = new ModuleManager(Mock.Of<IModuleInitializer>(), moduleCatalogMock.Object);
+            var moduleCatalogMock = Substitute.For<IModuleCatalog>();
+            moduleCatalogMock.Modules.Returns(new[] { moduleInfo });
+            IModuleManager manager = new ModuleManager(Substitute.For<IModuleInitializer>(), moduleCatalogMock);
 
             Assert.False(manager.IsModuleInitialized<MockModuleA>());
             moduleInfo.State = ModuleState.Initializing;
@@ -66,9 +66,9 @@ namespace Refrakt.Wpf.Tests.Modularity
         public void ModuleManagerReturnsCorrectInitializationStateWithName()
         {
             var moduleInfo = new ModuleInfo(typeof(MockModuleA));
-            var moduleCatalogMock = new Mock<IModuleCatalog>();
-            moduleCatalogMock.Setup(c => c.Modules).Returns(new[] { moduleInfo });
-            IModuleManager manager = new ModuleManager(Mock.Of<IModuleInitializer>(), moduleCatalogMock.Object);
+            var moduleCatalogMock = Substitute.For<IModuleCatalog>();
+            moduleCatalogMock.Modules.Returns(new[] { moduleInfo });
+            IModuleManager manager = new ModuleManager(Substitute.For<IModuleInitializer>(), moduleCatalogMock);
 
             Assert.False(manager.IsModuleInitialized(nameof(MockModuleA)));
             moduleInfo.State = ModuleState.Initializing;
@@ -80,9 +80,9 @@ namespace Refrakt.Wpf.Tests.Modularity
         [Fact]
         public void ModuleManagerLoadModuleGeneric_CallsLoadModuleWithName()
         {
-            var managerMock = new Mock<IModuleManager>();
-            managerMock.Object.LoadModule<MockModuleA>();
-            managerMock.Verify(m => m.LoadModule(nameof(MockModuleA)));
+            var managerMock = Substitute.For<IModuleManager>();
+            managerMock.LoadModule<MockModuleA>();
+            managerMock.Received().LoadModule(nameof(MockModuleA));
         }
     }
 }
