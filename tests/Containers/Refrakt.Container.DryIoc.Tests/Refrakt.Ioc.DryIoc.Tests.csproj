@@ -13,7 +13,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
-    <PackageReference Include="Moq" />
     <PackageReference Include="xunit.v3.mtp-v2" />
   </ItemGroup>
 
