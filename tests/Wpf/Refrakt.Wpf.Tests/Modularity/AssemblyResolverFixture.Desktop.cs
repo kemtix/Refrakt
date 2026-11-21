@@ -67,7 +67,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             }
         }
 
-        [Fact]
+        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
         public void ShouldResolveTypeFromAbsoluteUriToAssembly()
         {
             string assemblyPath = CompilerHelper.GenerateDynamicModule("ModuleInLoadedFromContext1", "Module", ModulesDirectory1 + @"\ModuleInLoadedFromContext1.dll");
@@ -94,7 +94,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             }
         }
 
-        [Fact]
+        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
         public void ShouldResolvePartialAssemblyName()
         {
             string assemblyPath = CompilerHelper.GenerateDynamicModule("ModuleInLoadedFromContext2", "Module", ModulesDirectory1 + @"\ModuleInLoadedFromContext2.dll");

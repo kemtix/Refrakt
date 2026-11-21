@@ -11,7 +11,7 @@ namespace Refrakt.Wpf.Tests.Modularity
 
     public class FileModuleTypeLoaderFixture
     {
-        [Fact]
+        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
         public void CanRetrieveModule()
         {
             var assemblyResolver = new MockAssemblyResolver();
