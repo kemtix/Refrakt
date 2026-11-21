@@ -4,9 +4,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Security.Policy;
-using System.Threading;
 using Refrakt.Modularity;
 using Xunit;
 
@@ -179,42 +176,6 @@ namespace Refrakt.Wpf.Tests.Modularity
         //}
 
         [Fact]
-        public void ShouldNotThrowWithLoadFromByteAssemblies()
-        {
-            CompilerHelper.CleanUpDirectory(@".\CompileOutput\");
-            CompilerHelper.CleanUpDirectory(@".\IgnoreLoadFromByteAssembliesTestDir\");
-            var results = CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs",
-                                                     @".\CompileOutput\MockModuleA.dll");
-
-            CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockAttributedModule.cs",
-                                       @".\IgnoreLoadFromByteAssembliesTestDir\MockAttributedModule.dll");
-
-            string path = @".\IgnoreLoadFromByteAssembliesTestDir";
-
-            AppDomain testDomain = null;
-            try
-            {
-                testDomain = CreateAppDomain();
-                RemoteDirectoryLookupCatalog remoteEnum = CreateRemoteDirectoryModuleCatalogInAppDomain(testDomain);
-
-                remoteEnum.LoadDynamicEmittedModule();
-
-                remoteEnum.LoadAssembliesByByte(@".\CompileOutput\MockModuleA.dll");
-
-                var infos = remoteEnum.DoEnumeration(path);
-
-                Assert.NotNull(
-                    infos.FirstOrDefault(x => x.ModuleType.IndexOf("Refrakt.Wpf.Tests.Mocks.Modules.MockAttributedModule") >= 0)
-                    );
-            }
-            finally
-            {
-                if (testDomain != null)
-                    AppDomain.Unload(testDomain);
-            }
-        }
-
-        [Fact]
         public void ShouldGetModuleNameFromAttribute()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockAttributedModule.cs",
@@ -370,64 +331,6 @@ namespace Refrakt.Wpf.Tests.Modularity
 
             Assert.Equal(2, modules.Count());
         }
-        //Disabled Warning	
-        // 'System.Security.Policy.Evidence.Count' is obsolete: '
-        // "Evidence should not be treated as an ICollection. Please use GetHostEnumerator and GetAssemblyEnumerator to 
-        // iterate over the evidence to collect a count."'
-#pragma warning disable 0618
-        [Fact]
-        public void CreateChildAppDomainHasParentEvidenceAndSetup()
-        {
-            TestableDirectoryModuleCatalog catalog = new TestableDirectoryModuleCatalog
-            {
-                ModulePath = ModulesDirectory4
-            };
-            catalog.Load();
-            Evidence parentEvidence = new Evidence();
-            AppDomainSetup parentSetup = new AppDomainSetup
-            {
-                ApplicationName = "Test Parent"
-            };
-            AppDomain parentAppDomain = AppDomain.CreateDomain("Parent", parentEvidence, parentSetup);
-            AppDomain childDomain = catalog.BuildChildDomain(parentAppDomain);
-
-            Assert.Equal(parentEvidence.Count, childDomain.Evidence.Count);
-            Assert.Equal("Test Parent", childDomain.SetupInformation.ApplicationName);
-            Assert.NotEqual(AppDomain.CurrentDomain.Evidence.Count, childDomain.Evidence.Count);
-            Assert.NotEqual(AppDomain.CurrentDomain.SetupInformation.ApplicationName, childDomain.SetupInformation.ApplicationName);
-        }
-#pragma warning restore 0618
-
-        [Fact]
-        public void ShouldLoadFilesEvenIfDynamicAssemblyExists()
-        {
-            CompilerHelper.CleanUpDirectory(@".\CompileOutput\");
-            CompilerHelper.CleanUpDirectory(@".\IgnoreDynamicGeneratedFilesTestDir\");
-            CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockAttributedModule.cs",
-                                       @".\IgnoreDynamicGeneratedFilesTestDir\MockAttributedModule.dll");
-
-            string path = @".\IgnoreDynamicGeneratedFilesTestDir";
-
-            AppDomain testDomain = null;
-            try
-            {
-                testDomain = CreateAppDomain();
-                RemoteDirectoryLookupCatalog remoteEnum = CreateRemoteDirectoryModuleCatalogInAppDomain(testDomain);
-
-                remoteEnum.LoadDynamicEmittedModule();
-
-                var infos = remoteEnum.DoEnumeration(path);
-
-                Assert.NotNull(
-                    infos.FirstOrDefault(x => x.ModuleType.IndexOf("Refrakt.Wpf.Tests.Mocks.Modules.MockAttributedModule") >= 0)
-                    );
-            }
-            finally
-            {
-                if (testDomain != null)
-                    AppDomain.Unload(testDomain);
-            }
-        }
 
         [Fact]
         public void ShouldLoadAssemblyEvenIfIsExposingTypesFromAnAssemblyInTheGac()
@@ -490,77 +393,9 @@ namespace Refrakt.Wpf.Tests.Modularity
             CompilerHelper.CleanUpDirectory(ModulesDirectory1);
         }
 
-
-
-
-        private AppDomain CreateAppDomain()
-        {
-            Evidence evidence = AppDomain.CurrentDomain.Evidence;
-            AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
-
-            return AppDomain.CreateDomain("TestDomain", evidence, setup);
-        }
-
-        private RemoteDirectoryLookupCatalog CreateRemoteDirectoryModuleCatalogInAppDomain(AppDomain testDomain)
-        {
-            RemoteDirectoryLookupCatalog remoteEnum;
-            Type remoteEnumType = typeof(RemoteDirectoryLookupCatalog);
-
-            remoteEnum = (RemoteDirectoryLookupCatalog)testDomain.CreateInstanceFrom(
-                                               remoteEnumType.Assembly.Location, remoteEnumType.FullName).Unwrap();
-            return remoteEnum;
-        }
-
         public void Dispose()
         {
             CleanUpDirectories();
-        }
-
-        private class TestableDirectoryModuleCatalog : DirectoryModuleCatalog
-        {
-            public new AppDomain BuildChildDomain(AppDomain currentDomain)
-            {
-                return base.BuildChildDomain(currentDomain);
-            }
-        }
-
-
-        private class RemoteDirectoryLookupCatalog : MarshalByRefObject
-        {
-
-            public void LoadAssembliesByByte(string assemblyPath)
-            {
-                byte[] assemblyBytes = File.ReadAllBytes(assemblyPath);
-                AppDomain.CurrentDomain.Load(assemblyBytes);
-            }
-
-            public IModuleInfo[] DoEnumeration(string path)
-            {
-                DirectoryModuleCatalog catalog = new DirectoryModuleCatalog
-                {
-                    ModulePath = path
-                };
-                catalog.Load();
-                return catalog.Modules.ToArray();
-            }
-
-            public void LoadDynamicEmittedModule()
-            {
-                // create a dynamic assembly and module 
-                AssemblyName assemblyName = new AssemblyName
-                {
-                    Name = "DynamicBuiltAssembly"
-                };
-                AssemblyBuilder assemblyBuilder = Thread.GetDomain().DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
-                ModuleBuilder module = assemblyBuilder.DefineDynamicModule("DynamicBuiltAssembly.dll");
-
-                // create a new type
-                TypeBuilder typeBuilder = module.DefineType("DynamicBuiltType", TypeAttributes.Public | TypeAttributes.Class);
-
-                // Create the type
-                Type helloWorldType = typeBuilder.CreateType();
-
-            }
         }
     }
 }

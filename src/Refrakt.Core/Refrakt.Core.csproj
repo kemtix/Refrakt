@@ -1,19 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461;net47;net5.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Refrakt</AssemblyName>
     <PackageId>Refrakt.Core</PackageId>
     <RootNamespace>Refrakt</RootNamespace>
     <!-- Summary is not actually supported at this time. Including the summary for future support. -->
     <!--<Summary>Refrakt provides an implementation of a collection of design patterns that are helpful in writing well structured and maintainable applications.</Summary>-->
-    <Description>Refrakt provides an implementation of a collection of design patterns that are helpful in writing well structured and maintainable XAML applications, including MVVM, dependency injection, commanding, event aggregation, and more. Its core functionality is a shared library targeting .NET Standard, .NET Framework and .NET 5; the WPF specific features are implemented in Refrakt.Wpf.</Description>
+    <Description>Refrakt provides an implementation of a collection of design patterns that are helpful in writing well structured and maintainable XAML applications, including MVVM, dependency injection, commanding, event aggregation, and more. Its core functionality is a library targeting .NET 10; the WPF specific features are implemented in Refrakt.Wpf.</Description>
     <PackageTags>refrakt;wpf;mvvm;xaml</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup Condition=" $(TargetFramework) == 'net461' ">
-    <PackageReference Include="System.ValueTuple" />
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />

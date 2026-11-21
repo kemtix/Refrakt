@@ -3,8 +3,7 @@
   <ItemGroup>
     <PackageReference Update="DryIoc.dll" Version="4.7.7" />
 
-    <PackageReference Update="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Update="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.31" />
+    <PackageReference Update="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.161" />
   </ItemGroup>
 
   <!-- Tests -->
@@ -21,13 +20,8 @@
     <PackageReference Update="Microsoft.Extensions.Logging" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies"
-                            Version="1.0.2" />
-  </ItemGroup>
-
   <ItemGroup Condition=" $(DISABLE_GITVERSIONING) != 'true' ">
-    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.4.194"
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.10.94"
                             Condition=" !$(MSBuildProjectDirectory.Contains('e2e')) "/>
   </ItemGroup>
 
