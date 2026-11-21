@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Specialized;
 using System.Linq;
-using Moq;
+using NSubstitute;
 using Refrakt.Ioc;
 using Refrakt.Regions;
 using Refrakt.Wpf.Tests.Mocks;
@@ -556,19 +556,18 @@ namespace Refrakt.Wpf.Tests.Regions
                 Action<NavigationResult> navigationCallback = nr => { };
                 NavigationParameters navigationParameters = new NavigationParameters();
 
-                Mock<IRegionNavigationService> mockRegionNavigationService = new Mock<IRegionNavigationService>();
-                mockRegionNavigationService.Setup(x => x.RequestNavigate(uri, navigationCallback, navigationParameters)).Verifiable();
+                IRegionNavigationService mockRegionNavigationService = Substitute.For<IRegionNavigationService>();
 
-                var containerMock = new Mock<IContainerExtension>();
-                containerMock.Setup(x => x.Resolve(typeof(IRegionNavigationService))).Returns(mockRegionNavigationService.Object);
+                var containerMock = Substitute.For<IContainerExtension>();
+                containerMock.Resolve(typeof(IRegionNavigationService)).Returns(mockRegionNavigationService);
                 ContainerLocator.ResetContainer();
-                ContainerLocator.SetContainerExtension(() => containerMock.Object);
+                ContainerLocator.SetContainerExtension(() => containerMock);
 
                 // Act
                 region.RequestNavigate(uri, navigationCallback, navigationParameters);
 
                 // Verify
-                mockRegionNavigationService.VerifyAll();
+                mockRegionNavigationService.Received().RequestNavigate(uri, navigationCallback, navigationParameters);
             }
             finally
             {

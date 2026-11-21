@@ -1,7 +1,7 @@
 
 
 using System;
-using Moq;
+using NSubstitute;
 using Refrakt.Regions;
 using Xunit;
 
@@ -29,13 +29,13 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockINavigate = new Mock<INavigateAsync>();
+            INavigateAsync mockINavigate = Substitute.For<INavigateAsync>();
 
             // Act
-            target.NavigationTarget = mockINavigate.Object;
+            target.NavigationTarget = mockINavigate;
 
             // Verify
-            Assert.Same(mockINavigate.Object, target.NavigationTarget);
+            Assert.Same(mockINavigate, target.NavigationTarget);
         }
 
         [Fact]
@@ -116,8 +116,8 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockNavigationTarget = new Mock<INavigateAsync>();
-            target.NavigationTarget = mockNavigationTarget.Object;
+            INavigateAsync mockNavigationTarget = Substitute.For<INavigateAsync>();
+            target.NavigationTarget = mockNavigationTarget;
 
             Uri uri1 = new Uri("Uri1", UriKind.Relative);
             RegionNavigationJournalEntry entry1 = new RegionNavigationJournalEntry() { Uri = uri1 };
@@ -134,14 +134,14 @@ namespace Refrakt.Wpf.Tests.Regions
 
 
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
 
             // Act
             target.GoBack();
@@ -151,9 +151,9 @@ namespace Refrakt.Wpf.Tests.Regions
             Assert.True(target.CanGoForward);
             Assert.Same(entry2, target.CurrentEntry);
 
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(1).RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null);
         }
 
         [Fact]
@@ -162,8 +162,8 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockNavigationTarget = new Mock<INavigateAsync>();
-            target.NavigationTarget = mockNavigationTarget.Object;
+            INavigateAsync mockNavigationTarget = Substitute.For<INavigateAsync>();
+            target.NavigationTarget = mockNavigationTarget;
 
             Uri uri1 = new Uri("Uri1", UriKind.Relative);
             RegionNavigationJournalEntry entry1 = new RegionNavigationJournalEntry() { Uri = uri1 };
@@ -180,14 +180,14 @@ namespace Refrakt.Wpf.Tests.Regions
 
 
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, false)));
+                .When(x => x.RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, false)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
 
             // Act
             target.GoBack();
@@ -197,9 +197,9 @@ namespace Refrakt.Wpf.Tests.Regions
             Assert.False(target.CanGoForward);
             Assert.Same(entry3, target.CurrentEntry);
 
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(1).RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null);
         }
 
         [Fact]
@@ -208,8 +208,8 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockNavigationTarget = new Mock<INavigateAsync>();
-            target.NavigationTarget = mockNavigationTarget.Object;
+            INavigateAsync mockNavigationTarget = Substitute.For<INavigateAsync>();
+            target.NavigationTarget = mockNavigationTarget;
 
             Uri uri1 = new Uri("Uri1", UriKind.Relative);
             RegionNavigationJournalEntry entry1 = new RegionNavigationJournalEntry() { Uri = uri1 };
@@ -226,14 +226,14 @@ namespace Refrakt.Wpf.Tests.Regions
 
 
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
 
             // Act
             target.GoBack();
@@ -244,9 +244,9 @@ namespace Refrakt.Wpf.Tests.Regions
             Assert.True(target.CanGoForward);
             Assert.Same(entry1, target.CurrentEntry);
 
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
+            mockNavigationTarget.Received(1).RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(1).RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null);
         }
 
         [Fact]
@@ -255,8 +255,8 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockNavigationTarget = new Mock<INavigateAsync>();
-            target.NavigationTarget = mockNavigationTarget.Object;
+            INavigateAsync mockNavigationTarget = Substitute.For<INavigateAsync>();
+            target.NavigationTarget = mockNavigationTarget;
 
             Uri uri1 = new Uri("Uri1", UriKind.Relative);
             RegionNavigationJournalEntry entry1 = new RegionNavigationJournalEntry() { Uri = uri1 };
@@ -272,14 +272,14 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RecordNavigation(entry3, true);
 
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
 
             target.GoBack();
             target.GoBack();
@@ -292,9 +292,9 @@ namespace Refrakt.Wpf.Tests.Regions
             Assert.True(target.CanGoForward);
             Assert.Same(entry2, target.CurrentEntry);
 
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null), Times.Exactly(2));
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
+            mockNavigationTarget.Received(1).RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(2).RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null);
         }
 
         [Fact]
@@ -303,8 +303,8 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockNavigationTarget = new Mock<INavigateAsync>();
-            target.NavigationTarget = mockNavigationTarget.Object;
+            INavigateAsync mockNavigationTarget = Substitute.For<INavigateAsync>();
+            target.NavigationTarget = mockNavigationTarget;
 
             Uri uri1 = new Uri("Uri1", UriKind.Relative);
             RegionNavigationJournalEntry entry1 = new RegionNavigationJournalEntry() { Uri = uri1 };
@@ -320,14 +320,14 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RecordNavigation(entry3, true);
 
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, false)));
+                .When(x => x.RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, false)));
 
             target.GoBack();
 
@@ -339,9 +339,9 @@ namespace Refrakt.Wpf.Tests.Regions
             Assert.True(target.CanGoForward);
             Assert.Same(entry2, target.CurrentEntry);
 
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(1).RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(1).RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null);
         }
 
         [Fact]
@@ -350,8 +350,8 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockNavigationTarget = new Mock<INavigateAsync>();
-            target.NavigationTarget = mockNavigationTarget.Object;
+            INavigateAsync mockNavigationTarget = Substitute.For<INavigateAsync>();
+            target.NavigationTarget = mockNavigationTarget;
 
             Uri uri1 = new Uri("Uri1", UriKind.Relative);
             RegionNavigationJournalEntry entry1 = new RegionNavigationJournalEntry() { Uri = uri1 };
@@ -367,14 +367,14 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RecordNavigation(entry3, true);
 
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
 
             target.GoBack();
             target.GoBack();
@@ -388,9 +388,9 @@ namespace Refrakt.Wpf.Tests.Regions
             Assert.False(target.CanGoForward);
             Assert.Same(entry3, target.CurrentEntry);
 
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null), Times.Exactly(2));
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
+            mockNavigationTarget.Received(1).RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(2).RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(1).RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null);
         }
 
         [Fact]
@@ -399,8 +399,8 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockNavigationTarget = new Mock<INavigateAsync>();
-            target.NavigationTarget = mockNavigationTarget.Object;
+            INavigateAsync mockNavigationTarget = Substitute.For<INavigateAsync>();
+            target.NavigationTarget = mockNavigationTarget;
 
             Uri uri1 = new Uri("Uri1", UriKind.Relative);
             RegionNavigationJournalEntry entry1 = new RegionNavigationJournalEntry() { Uri = uri1 };
@@ -418,14 +418,14 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RecordNavigation(entry2, true);
 
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
 
             target.GoBack();
 
@@ -445,8 +445,8 @@ namespace Refrakt.Wpf.Tests.Regions
             // Prepare
             RegionNavigationJournal target = new RegionNavigationJournal();
 
-            Mock<INavigateAsync> mockNavigationTarget = new Mock<INavigateAsync>();
-            target.NavigationTarget = mockNavigationTarget.Object;
+            INavigateAsync mockNavigationTarget = Substitute.For<INavigateAsync>();
+            target.NavigationTarget = mockNavigationTarget;
 
             Uri uri1 = new Uri("Uri1", UriKind.Relative);
             RegionNavigationJournalEntry entry1 = new RegionNavigationJournalEntry() { Uri = uri1 };
@@ -466,17 +466,17 @@ namespace Refrakt.Wpf.Tests.Regions
             target.RecordNavigation(entry4, true);
 
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
             mockNavigationTarget
-                .Setup(x => x.RequestNavigate(uri4, It.IsAny<Action<NavigationResult>>(), null))
-                .Callback<Uri, Action<NavigationResult>, NavigationParameters>((u, c, n) => c(new NavigationResult(null, true)));
+                .When(x => x.RequestNavigate(uri4, Arg.Any<Action<NavigationResult>>(), null))
+                .Do(ci => ci.ArgAt<Action<NavigationResult>>(1)(new NavigationResult(null, true)));
 
             Assert.Equal(entry4, target.CurrentEntry);
 
@@ -486,10 +486,10 @@ namespace Refrakt.Wpf.Tests.Regions
             Assert.True(target.CanGoForward);
             Assert.Same(entry2, target.CurrentEntry);
 
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri1, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri2, It.IsAny<Action<NavigationResult>>(), null), Times.Once());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri3, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
-            mockNavigationTarget.Verify(x => x.RequestNavigate(uri4, It.IsAny<Action<NavigationResult>>(), null), Times.Never());
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri1, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.Received(1).RequestNavigate(uri2, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri3, Arg.Any<Action<NavigationResult>>(), null);
+            mockNavigationTarget.DidNotReceive().RequestNavigate(uri4, Arg.Any<Action<NavigationResult>>(), null);
         }
     }
 }

@@ -2,7 +2,8 @@
 
 using System;
 using System.Windows;
-using Moq;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Refrakt.Ioc;
 using Refrakt.Regions;
 using Xunit;
@@ -17,7 +18,7 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             // Arrange
 
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
@@ -27,7 +28,7 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationContext = new NavigationContext(null, new Uri(view.GetType().Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             // Act
@@ -45,7 +46,7 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             // Arrange
 
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
@@ -57,7 +58,7 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationContext = new NavigationContext(null, new Uri(view2.GetType().Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             // Act
@@ -75,7 +76,7 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             // Arrange
 
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
@@ -87,7 +88,7 @@ namespace Refrakt.Wpf.Tests.Regions
 
             var navigationContext = new NavigationContext(null, new Uri(view2.GetType().FullName, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             // Act
@@ -105,21 +106,20 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             // Arrange
 
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
-            var viewMock = new Mock<INavigationAware>();
+            var viewMock = Substitute.For<INavigationAware>();
             viewMock
-                .Setup(v => v.IsNavigationTarget(It.IsAny<NavigationContext>()))
-                .Returns(true)
-                .Verifiable();
+                .IsNavigationTarget(Arg.Any<NavigationContext>())
+                .Returns(true);
 
-            region.Add(viewMock.Object);
+            region.Add(viewMock);
 
-            var navigationContext = new NavigationContext(null, new Uri(viewMock.Object.GetType().Name, UriKind.Relative));
+            var navigationContext = new NavigationContext(null, new Uri(viewMock.GetType().Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             // Act
@@ -129,8 +129,8 @@ namespace Refrakt.Wpf.Tests.Regions
 
             // Assert
 
-            Assert.Same(viewMock.Object, returnedView);
-            viewMock.VerifyAll();
+            Assert.Same(viewMock, returnedView);
+            viewMock.Received().IsNavigationTarget(Arg.Any<NavigationContext>());
         }
 
         [StaFact]
@@ -138,23 +138,22 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             // Arrange
 
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
-            var dataContextMock = new Mock<INavigationAware>();
+            var dataContextMock = Substitute.For<INavigationAware>();
             dataContextMock
-                .Setup(v => v.IsNavigationTarget(It.IsAny<NavigationContext>()))
-                .Returns(true)
-                .Verifiable();
-            var viewMock = new Mock<FrameworkElement>();
-            viewMock.Object.DataContext = dataContextMock.Object;
+                .IsNavigationTarget(Arg.Any<NavigationContext>())
+                .Returns(true);
+            var viewMock = Substitute.For<FrameworkElement>();
+            viewMock.DataContext = dataContextMock;
 
-            region.Add(viewMock.Object);
+            region.Add(viewMock);
 
-            var navigationContext = new NavigationContext(null, new Uri(viewMock.Object.GetType().Name, UriKind.Relative));
+            var navigationContext = new NavigationContext(null, new Uri(viewMock.GetType().Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             // Act
@@ -164,8 +163,8 @@ namespace Refrakt.Wpf.Tests.Regions
 
             // Assert
 
-            Assert.Same(viewMock.Object, returnedView);
-            dataContextMock.VerifyAll();
+            Assert.Same(viewMock, returnedView);
+            dataContextMock.Received().IsNavigationTarget(Arg.Any<NavigationContext>());
         }
 
         [Fact]
@@ -173,17 +172,17 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             // Arrange
 
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
             var view = new TestView();
 
-            containerMock.Setup(sl => sl.Resolve(typeof(object), view.GetType().Name)).Returns(view);
+            containerMock.Resolve(typeof(object), view.GetType().Name).Returns(view);
 
             var navigationContext = new NavigationContext(null, new Uri(view.GetType().Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             // Act
@@ -202,25 +201,24 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             // Arrange
 
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
-            var viewMock = new Mock<INavigationAware>();
+            var viewMock = Substitute.For<INavigationAware>();
             viewMock
-                .Setup(v => v.IsNavigationTarget(It.IsAny<NavigationContext>()))
-                .Returns(false)
-                .Verifiable();
+                .IsNavigationTarget(Arg.Any<NavigationContext>())
+                .Returns(false);
 
-            region.Add(viewMock.Object);
+            region.Add(viewMock);
 
             var newView = new TestView();
 
-            containerMock.Setup(sl => sl.Resolve(typeof(object), viewMock.Object.GetType().Name)).Returns(newView);
+            containerMock.Resolve(typeof(object), viewMock.GetType().Name).Returns(newView);
 
-            var navigationContext = new NavigationContext(null, new Uri(viewMock.Object.GetType().Name, UriKind.Relative));
+            var navigationContext = new NavigationContext(null, new Uri(viewMock.GetType().Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             // Act
@@ -232,34 +230,33 @@ namespace Refrakt.Wpf.Tests.Regions
 
             Assert.Same(newView, returnedView);
             Assert.True(region.Views.Contains(newView));
-            viewMock.VerifyAll();
+            viewMock.Received().IsNavigationTarget(Arg.Any<NavigationContext>());
         }
 
         [StaFact]
         public void WhenViewExistsAndHasDataContextThatImplementsINavigationAware_ThenDataContextIsQueriedForNavigationAndNewInstanceIsCreatedIfItRejectsIt()
         {
             // Arrange
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
-            var dataContextMock = new Mock<INavigationAware>();
+            var dataContextMock = Substitute.For<INavigationAware>();
             dataContextMock
-                .Setup(v => v.IsNavigationTarget(It.IsAny<NavigationContext>()))
-                .Returns(false)
-                .Verifiable();
-            var viewMock = new Mock<FrameworkElement>();
-            viewMock.Object.DataContext = dataContextMock.Object;
+                .IsNavigationTarget(Arg.Any<NavigationContext>())
+                .Returns(false);
+            var viewMock = Substitute.For<FrameworkElement>();
+            viewMock.DataContext = dataContextMock;
 
-            region.Add(viewMock.Object);
+            region.Add(viewMock);
 
             var newView = new TestView();
 
-            containerMock.Setup(sl => sl.Resolve(typeof(object), viewMock.Object.GetType().Name)).Returns(newView);
+            containerMock.Resolve(typeof(object), viewMock.GetType().Name).Returns(newView);
 
-            var navigationContext = new NavigationContext(null, new Uri(viewMock.Object.GetType().Name, UriKind.Relative));
+            var navigationContext = new NavigationContext(null, new Uri(viewMock.GetType().Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
             // Act
             var returnedView = navigationTargetHandler.LoadContent(region, navigationContext);
@@ -267,20 +264,20 @@ namespace Refrakt.Wpf.Tests.Regions
             // Assert
             Assert.Same(newView, returnedView);
             Assert.True(region.Views.Contains(newView));
-            dataContextMock.VerifyAll();
+            dataContextMock.Received().IsNavigationTarget(Arg.Any<NavigationContext>());
         }
 
         [Fact]
         public void WhenViewCannotBeCreated_ThenThrowsAnException()
         {
-            var containerMock = new Mock<IContainerExtension>();
-            containerMock.Setup(sl => sl.Resolve(typeof(object), typeof(TestView).Name)).Throws<ActivationException>();
+            var containerMock = Substitute.For<IContainerExtension>();
+            containerMock.Resolve(typeof(object), typeof(TestView).Name).Throws<ActivationException>();
 
             var region = new Region();
 
             var navigationContext = new NavigationContext(null, new Uri(typeof(TestView).Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
             // Act
 
@@ -296,17 +293,17 @@ namespace Refrakt.Wpf.Tests.Regions
         public void WhenViewAddedByHandlerDoesNotImplementINavigationAware_ThenReturnsView()
         {
             // Arrange
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
             var view = new TestView();
 
-            containerMock.Setup(sl => sl.Resolve(typeof(object), view.GetType().Name)).Returns(view);
+            containerMock.Resolve(typeof(object), view.GetType().Name).Returns(view);
 
             var navigationContext = new NavigationContext(null, new Uri(view.GetType().Name, UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
             // Act
             var firstReturnedView = navigationTargetHandler.LoadContent(region, navigationContext);
@@ -315,17 +312,17 @@ namespace Refrakt.Wpf.Tests.Regions
             // Assert
             Assert.Same(view, firstReturnedView);
             Assert.Same(view, secondReturnedView);
-            containerMock.Verify(sl => sl.Resolve(typeof(object), view.GetType().Name), Times.Once());
+            containerMock.Received(1).Resolve(typeof(object), view.GetType().Name);
         }
 
         [Fact]
         public void WhenRequestingContentForNullRegion_ThenThrows()
         {
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var navigationContext = new NavigationContext(null, new Uri("/", UriKind.Relative));
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             ExceptionAssert.Throws<ArgumentNullException>(
@@ -339,11 +336,11 @@ namespace Refrakt.Wpf.Tests.Regions
         [Fact]
         public void WhenRequestingContentForNullContext_ThenThrows()
         {
-            var containerMock = new Mock<IContainerExtension>();
+            var containerMock = Substitute.For<IContainerExtension>();
 
             var region = new Region();
 
-            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock.Object);
+            var navigationTargetHandler = new TestRegionNavigationContentLoader(containerMock);
 
 
             ExceptionAssert.Throws<ArgumentNullException>(

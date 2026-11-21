@@ -1,7 +1,7 @@
 
 
 using System;
-using Moq;
+using NSubstitute;
 using Refrakt.Regions;
 using Xunit;
 
@@ -26,7 +26,7 @@ namespace Refrakt.Wpf.Tests.Regions
         [Fact]
         public void WhenNavigatingWithANullStringTarget_ThenThrows()
         {
-            INavigateAsync navigate = new Mock<INavigateAsync>().Object;
+            INavigateAsync navigate = Substitute.For<INavigateAsync>();
             string target = null;
 
             ExceptionAssert.Throws<ArgumentNullException>(
@@ -39,37 +39,29 @@ namespace Refrakt.Wpf.Tests.Regions
         [Fact]
         public void WhenNavigatingWithARelativeStringTarget_ThenNavigatesToRelativeUri()
         {
-            var navigateMock = new Mock<INavigateAsync>();
-            navigateMock
-                .Setup(nv =>
-                    nv.RequestNavigate(
-                        It.Is<Uri>(u => !u.IsAbsoluteUri && u.OriginalString == "relative"),
-                        It.Is<Action<NavigationResult>>(c => c != null)))
-                .Verifiable();
+            var navigateMock = Substitute.For<INavigateAsync>();
 
             string target = "relative";
 
-            navigateMock.Object.RequestNavigate(target);
+            navigateMock.RequestNavigate(target);
 
-            navigateMock.VerifyAll();
+            navigateMock.Received().RequestNavigate(
+                Arg.Is<Uri>(u => !u.IsAbsoluteUri && u.OriginalString == "relative"),
+                Arg.Is<Action<NavigationResult>>(c => c != null));
         }
 
         [Fact]
         public void WhenNavigatingWithAnAbsoluteStringTarget_ThenNavigatesToAbsoluteUri()
         {
-            var navigateMock = new Mock<INavigateAsync>();
-            navigateMock
-                .Setup(nv =>
-                    nv.RequestNavigate(
-                        It.Is<Uri>(u => u.IsAbsoluteUri && u.Host == "test" && u.AbsolutePath == "/path"),
-                        It.Is<Action<NavigationResult>>(c => c != null)))
-                .Verifiable();
+            var navigateMock = Substitute.For<INavigateAsync>();
 
             string target = "http://test/path";
 
-            navigateMock.Object.RequestNavigate(target);
+            navigateMock.RequestNavigate(target);
 
-            navigateMock.VerifyAll();
+            navigateMock.Received().RequestNavigate(
+                Arg.Is<Uri>(u => u.IsAbsoluteUri && u.Host == "test" && u.AbsolutePath == "/path"),
+                Arg.Is<Action<NavigationResult>>(c => c != null));
         }
 
         [Fact]
@@ -90,18 +82,13 @@ namespace Refrakt.Wpf.Tests.Regions
         {
             Uri target = new Uri("relative", UriKind.Relative);
 
-            var navigateMock = new Mock<INavigateAsync>();
-            navigateMock
-                .Setup(nv =>
-                    nv.RequestNavigate(
-                        target,
-                        It.Is<Action<NavigationResult>>(c => c != null)))
-                .Verifiable();
+            var navigateMock = Substitute.For<INavigateAsync>();
 
+            navigateMock.RequestNavigate(target);
 
-            navigateMock.Object.RequestNavigate(target);
-
-            navigateMock.VerifyAll();
+            navigateMock.Received().RequestNavigate(
+                target,
+                Arg.Is<Action<NavigationResult>>(c => c != null));
         }
     }
 }
