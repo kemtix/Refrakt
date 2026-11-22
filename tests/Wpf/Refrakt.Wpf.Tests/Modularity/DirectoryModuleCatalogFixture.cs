@@ -1,4 +1,3 @@
-#if DEBUG
 
 using System;
 using System.IO;
@@ -17,6 +16,9 @@ namespace Refrakt.Wpf.Tests.Modularity
         private const string ModulesDirectory4 = @".\DynamicModules\MocksModules2";
         private const string ModulesDirectory5 = @".\DynamicModules\ModulesMainDomain\";
         private const string ModulesDirectory6 = @".\DynamicModules\Special char #";
+        private const string ModulesDirectory7 = @".\DynamicModules\NotLoadedByScanModules";
+        private const string ModulesDirectory8 = @".\DynamicModules\MissingBaseTypeModules";
+        private const string MissingBaseTypeReferenceDirectory = @".\DynamicModules\MissingBaseTypeReference";
         private const string InvalidModulesDirectory = @".\Modularity";
 
         public DirectoryModuleCatalogFixture()
@@ -31,6 +33,9 @@ namespace Refrakt.Wpf.Tests.Modularity
             CompilerHelper.CleanUpDirectory(ModulesDirectory3);
             CompilerHelper.CleanUpDirectory(ModulesDirectory4);
             CompilerHelper.CleanUpDirectory(ModulesDirectory5);
+            CompilerHelper.CleanUpDirectory(ModulesDirectory7);
+            CompilerHelper.CleanUpDirectory(ModulesDirectory8);
+            CompilerHelper.CleanUpDirectory(MissingBaseTypeReferenceDirectory);
             CompilerHelper.CleanUpDirectory(InvalidModulesDirectory);
         }
 
@@ -71,7 +76,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             });
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldReturnAListOfModuleInfo()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs",
@@ -95,7 +100,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Contains("Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA", modules[0].ModuleType);
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldCorrectlyEscapeRef()
         {
             string assemblyPath = ModulesDirectory6 + @"\Mock Module #.dll";
@@ -119,6 +124,72 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.True(Uri.TryCreate(moduleRef, UriKind.Absolute, out Uri moduleUri));
 
             Assert.Equal(fullAssemblyPath, moduleUri.LocalPath);
+        }
+
+        [Fact]
+        public void ShouldNotLoadTheScannedModuleAssembly()
+        {
+            string assemblyPath = ModulesDirectory7 + @"\MockModuleNotLoadedByScan.dll";
+            CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs", assemblyPath);
+            string fullAssemblyPath = Path.GetFullPath(assemblyPath);
+
+            DirectoryModuleCatalog catalog = new DirectoryModuleCatalog
+            {
+                ModulePath = ModulesDirectory7
+            };
+            catalog.Load();
+
+            var modules = catalog.Modules.ToArray();
+
+            Assert.Single(modules);
+            Assembly loadedAssembly = AppDomain.CurrentDomain.GetAssemblies().Where(assembly => !assembly.IsDynamic)
+                .FirstOrDefault(assembly => string.Equals(assembly.Location, fullAssemblyPath, StringComparison.OrdinalIgnoreCase));
+            Assert.Null(loadedAssembly);
+        }
+
+        [Fact]
+        public void ShouldBuildRefAsAnEscapedFileUriOfTheFullPath()
+        {
+            string assemblyPath = ModulesDirectory6 + @"\Mock Module #.dll";
+            CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs", assemblyPath);
+            string fullAssemblyPath = Path.GetFullPath(assemblyPath);
+
+            DirectoryModuleCatalog catalog = new DirectoryModuleCatalog
+            {
+                ModulePath = ModulesDirectory6
+            };
+            catalog.Load();
+
+            var modules = catalog.Modules.ToArray();
+
+            Assert.Single(modules);
+            string moduleRef = modules[0].Ref;
+            Assert.True(Uri.TryCreate(moduleRef, UriKind.Absolute, out Uri moduleUri));
+            Assert.Equal(Uri.UriSchemeFile, moduleUri.Scheme);
+            Assert.Contains("%23", moduleRef);
+            Assert.Equal(new Uri(fullAssemblyPath).AbsoluteUri, moduleRef);
+            Assert.Equal(fullAssemblyPath, moduleUri.LocalPath);
+        }
+
+        [Fact]
+        public void ShouldThrowAndAddNoModuleWhenAModuleTypeDerivesFromATypeOutsideTheSearchedPaths()
+        {
+            string referencePath = MissingBaseTypeReferenceDirectory + @"\MockModuleMissingBaseType.dll";
+            CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs", referencePath);
+
+            CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleReferencingOtherModule.cs",
+                                       ModulesDirectory8 + @"\MockModuleDerivingFromMissingType.dll", referencePath);
+
+            DirectoryModuleCatalog catalog = new DirectoryModuleCatalog
+            {
+                ModulePath = ModulesDirectory8
+            };
+
+            var ex = Assert.Throws<Exception>(() => catalog.Load());
+
+            Assert.Equal("There was an error loading assemblies.", ex.Message);
+            Assert.NotNull(ex.InnerException);
+            Assert.Empty(catalog.Modules);
         }
 
         //TODO: figure out how ot translat ehtese tests to Xunit
@@ -175,7 +246,7 @@ namespace Refrakt.Wpf.Tests.Modularity
         //    Assert.Contains(modules[0].ModuleType, "Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA");
         //}
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldGetModuleNameFromAttribute()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockAttributedModule.cs",
@@ -194,7 +265,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Equal("TestModule", modules[0].ModuleName);
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldGetDependantModulesFromAttribute()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockDependencyModule.cs",
@@ -221,7 +292,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Equal(dependencyModule.ModuleName, dependantModule.DependsOn[0]);
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void UseClassNameAsModuleNameWhenNotSpecifiedInAttribute()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs",
@@ -239,7 +310,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Equal("MockModuleA", modules[0].ModuleName);
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldDefaultInitializationModeToWhenAvailable()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs",
@@ -257,7 +328,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Equal(InitializationMode.WhenAvailable, modules[0].InitializationMode);
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldGetOnDemandFromAttribute()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockAttributedModule.cs",
@@ -276,7 +347,7 @@ namespace Refrakt.Wpf.Tests.Modularity
 
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldNotLoadAssembliesInCurrentAppDomain()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs",
@@ -312,7 +383,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Empty(modules);
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldLoadAssemblyEvenIfTheyAreReferencingEachOther()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs",
@@ -332,7 +403,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Equal(2, modules.Count());
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldLoadAssemblyEvenIfIsExposingTypesFromAnAssemblyInTheGac()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockExposingTypeFromGacAssemblyModule.cs",
@@ -349,7 +420,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Single(modules);
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldNotFailWhenAlreadyLoadedAssembliesAreAlsoFoundOnTargetDirectory()
         {
             CompilerHelper.CompileFile(@"Refrakt.Wpf.Tests.Mocks.Modules.MockModuleA.cs",
@@ -369,7 +440,7 @@ namespace Refrakt.Wpf.Tests.Modularity
             Assert.Single(modules);
         }
 
-        [Fact(Skip = "CodeDom is not supported on .NET 10; re-enabled by #7 (https://github.com/kemtix/Refrakt/issues/7)")]
+        [Fact]
         public void ShouldIgnoreAbstractClassesThatImplementIModule()
         {
             CompilerHelper.CleanUpDirectory(ModulesDirectory1);
@@ -399,4 +470,3 @@ namespace Refrakt.Wpf.Tests.Modularity
         }
     }
 }
-#endif

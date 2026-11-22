@@ -19,6 +19,7 @@ Refrakt.Wpf helps you more easily design and build rich, flexible, and easy to m
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" />
   </ItemGroup>
 
   <ItemGroup>
