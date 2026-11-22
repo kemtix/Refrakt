@@ -1,13 +1,14 @@
 
 
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
-using Microsoft.CSharp;
-using Refrakt.Ioc;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using Refrakt.Modularity;
 using Xunit;
 
@@ -32,30 +33,20 @@ namespace Refrakt.Wpf.Tests
 
                     public void RegisterTypes(IContainerRegistry containerRegistry)
                     {
-                        
+
                     }
                 }
             }";
 
         public static Assembly CompileFileAndLoadAssembly(string input, string output, params string[] references)
         {
-            return CompileFile(input, output, references).CompiledAssembly;
+            CompileFile(input, output, references);
+            return Assembly.LoadFrom(Path.GetFullPath(output));
         }
 
-        public static CompilerResults CompileFile(string input, string output, params string[] references)
+        public static EmitResult CompileFile(string input, string output, params string[] references)
         {
             CreateOutput(output);
-
-            List<string> referencedAssemblies = new List<string>(references.Length + 3);
-
-            referencedAssemblies.AddRange(references);
-            referencedAssemblies.Add("System.dll");
-            referencedAssemblies.Add(typeof(IContainerRegistry).Assembly.CodeBase.Replace(@"file:///", ""));
-            referencedAssemblies.Add(typeof(IModule).Assembly.CodeBase.Replace(@"file:///", ""));
-            referencedAssemblies.Add(typeof(ModuleAttribute).Assembly.CodeBase.Replace(@"file:///", ""));
-
-            CSharpCodeProvider codeProvider = new CSharpCodeProvider();
-            CompilerParameters cp = new CompilerParameters(referencedAssemblies.ToArray(), output);
 
             using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(input))
             {
@@ -66,9 +57,7 @@ namespace Refrakt.Wpf.Tests
 
                 StreamReader reader = new StreamReader(stream);
                 string source = reader.ReadToEnd();
-                CompilerResults results = codeProvider.CompileAssemblyFromSource(cp, source);
-                ThrowIfCompilerError(results);
-                return results;
+                return Compile(source, output, references);
             }
         }
 
@@ -99,21 +88,11 @@ namespace Refrakt.Wpf.Tests
             }
         }
 
-        public static CompilerResults CompileCode(string code, string output)
+        public static EmitResult CompileCode(string code, string output)
         {
             CreateOutput(output);
-            List<string> referencedAssemblies = new List<string>();
-            referencedAssemblies.Add("System.dll");
-            referencedAssemblies.Add(typeof(IContainerExtension).Assembly.CodeBase.Replace(@"file:///", ""));
-            referencedAssemblies.Add(typeof(IModule).Assembly.CodeBase.Replace(@"file:///", ""));
-            referencedAssemblies.Add(typeof(ModuleAttribute).Assembly.CodeBase.Replace(@"file:///", ""));
 
-            CompilerResults results = new CSharpCodeProvider().CompileAssemblyFromSource(
-                new CompilerParameters(referencedAssemblies.ToArray(), output), code);
-
-            ThrowIfCompilerError(results);
-
-            return results;
+            return Compile(code, output);
         }
 
         public static string GenerateDynamicModule(string assemblyName, string moduleName, string outpath, params string[] dependencies)
@@ -153,17 +132,17 @@ namespace Refrakt.Wpf.Tests
             return GenerateDynamicModule(assemblyName, moduleName, outpath, dependencies);
         }
 
-        public static void ThrowIfCompilerError(CompilerResults results)
+        public static void ThrowIfCompilerError(EmitResult result)
         {
-            if (results.Errors.HasErrors)
+            if (!result.Success)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("Compilation failed.");
-                foreach (CompilerError error in results.Errors)
+                foreach (Diagnostic error in result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error))
                 {
                     sb.AppendLine(error.ToString());
                 }
-                Assert.False(results.Errors.HasErrors, sb.ToString());
+                Assert.Fail(sb.ToString());
             }
         }
 
@@ -190,6 +169,65 @@ namespace Refrakt.Wpf.Tests
                     }
                 }
             }
+        }
+
+        private static EmitResult Compile(string source, string output, params string[] references)
+        {
+            CSharpCompilation compilation = CSharpCompilation.Create(
+                Path.GetFileNameWithoutExtension(output),
+                new[] { CSharpSyntaxTree.ParseText(source) },
+                GetMetadataReferences(references),
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            using (MemoryStream peStream = new MemoryStream())
+            {
+                EmitResult result = compilation.Emit(peStream);
+                ThrowIfCompilerError(result);
+                File.WriteAllBytes(output, peStream.ToArray());
+                return result;
+            }
+        }
+
+        private static IEnumerable<MetadataReference> GetMetadataReferences(string[] references)
+        {
+            string[] trustedAssemblies = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") ?? string.Empty)
+                .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
+
+            List<string> paths = new List<string>(trustedAssemblies);
+            paths.Add(typeof(IModule).Assembly.Location);
+            paths.Add(typeof(ModuleAttribute).Assembly.Location);
+
+            foreach (string reference in references)
+            {
+                if (Path.GetFileName(reference) == reference)
+                {
+                    // A bare file name, such as System.Transactions.dll, is taken from the trusted platform assemblies.
+                    string trustedAssembly = trustedAssemblies.FirstOrDefault(
+                        path => string.Equals(Path.GetFileName(path), reference, StringComparison.OrdinalIgnoreCase));
+                    if (trustedAssembly == null)
+                    {
+                        throw new ArgumentException($"'{reference}' is not a trusted platform assembly.", nameof(references));
+                    }
+
+                    paths.Add(trustedAssembly);
+                }
+                else
+                {
+                    paths.Add(reference);
+                }
+            }
+
+            // This test assembly also compiles Mocks\Modules\*.cs: referencing it gives CS0433 when a
+            // module source uses a type of another compiled module (for example DummyClass).
+            string testAssembly = Path.GetFullPath(typeof(CompilerHelper).Assembly.Location);
+
+            // Refrakt.dll and Refrakt.Wpf.dll are already trusted platform assemblies: a duplicate gives CS1703.
+            return paths
+                .Select(Path.GetFullPath)
+                .Where(path => !string.Equals(path, testAssembly, StringComparison.OrdinalIgnoreCase))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Select(path => MetadataReference.CreateFromFile(path))
+                .ToList();
         }
     }
 }
