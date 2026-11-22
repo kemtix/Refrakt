@@ -7,6 +7,7 @@
   <Folder Name="/e2e/">
     <Project Path="e2e/Wpf/HelloWorld.Bootstraper/HelloWorld.Bootstrapper.csproj" />
     <Project Path="e2e/Wpf/HelloWorld.Core/HelloWorld.Core.csproj" />
+    <Project Path="e2e/Wpf/HelloWorld.DirectoryCatalog/HelloWorld.DirectoryCatalog.csproj" />
     <Project Path="e2e/Wpf/HelloWorld/HelloWorld.csproj" />
     <Project Path="e2e/Wpf/Modules/HelloWorld.Modules.ModuleA/HelloWorld.Modules.ModuleA.csproj" />
   </Folder>

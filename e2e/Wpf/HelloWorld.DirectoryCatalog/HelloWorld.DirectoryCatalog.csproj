@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>HelloWorld</RootNamespace>
+    <AssemblyName>HelloWorld.DirectoryCatalog</AssemblyName>
+    <ApplicationIcon>..\HelloWorld\refrakt-sandbox.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);..\HelloWorld\bin\**;..\HelloWorld\obj\**;..\HelloWorld\App.*</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!-- Same sources as HelloWorld, by link; only App.xaml and App.xaml.cs are this project's own. -->
+  <ItemGroup>
+    <Page Include="..\HelloWorld\**\*.xaml" LinkBase="%(RecurseDir)" Generator="MSBuild:Compile" Exclude="$(DefaultItemExcludes)" />
+    <Compile Include="..\HelloWorld\**\*.cs" LinkBase="%(RecurseDir)" Exclude="$(DefaultItemExcludes)" />
+  </ItemGroup>
+
+  <!-- The modules come from the Modules folder, not from ModuleCatalog.xaml. -->
+  <ItemGroup>
+    <Page Remove="..\HelloWorld\ModuleCatalog.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Refrakt.Core\Refrakt.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Wpf\Refrakt.DryIoc.Wpf\Refrakt.DryIoc.Wpf.csproj" />
+    <ProjectReference Include="..\..\..\src\Wpf\Refrakt.Wpf\Refrakt.Wpf.csproj" />
+    <ProjectReference Include="..\HelloWorld.Core\HelloWorld.Core.csproj" />
+    <!-- Build order only: ModuleA is neither referenced nor copied to the output root, it is found at run time in Modules. -->
+    <ProjectReference Include="..\Modules\HelloWorld.Modules.ModuleA\HelloWorld.Modules.ModuleA.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!-- Copies ModuleA's own assembly (and its .pdb) to $(OutDir)Modules\. Its dependencies are already in the output root. -->
+  <Target Name="CopyModuleAToModulesFolder" AfterTargets="Build">
+    <MSBuild Projects="..\Modules\HelloWorld.Modules.ModuleA\HelloWorld.Modules.ModuleA.csproj"
+             Targets="GetTargetPath"
+             Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="_ModuleATargetPath" />
+    </MSBuild>
+
+    <ItemGroup>
+      <_ModuleAFile Include="@(_ModuleATargetPath->'%(FullPath)')" />
+      <_ModuleAFile Include="@(_ModuleATargetPath->'%(RootDir)%(Directory)%(Filename).pdb')"
+                    Condition="Exists('%(RootDir)%(Directory)%(Filename).pdb')" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_ModuleAFile)" DestinationFolder="$(OutDir)Modules\" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- DirectoryModuleCatalog resolves ModulePath "Modules" against the current directory, so `dotnet run` starts the app
+       in the output folder. Set in a target: $(TargetDir) is not known yet when the project body is evaluated. -->
+  <Target Name="RunFromOutputFolder" BeforeTargets="ComputeRunArguments">
+    <PropertyGroup>
+      <RunWorkingDirectory>$(TargetDir)</RunWorkingDirectory>
+    </PropertyGroup>
+  </Target>
+
+</Project>
