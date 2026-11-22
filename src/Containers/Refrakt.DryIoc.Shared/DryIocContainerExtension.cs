@@ -25,7 +25,6 @@ namespace Refrakt.DryIoc
                                                          .With(Made.Of(FactoryMethod.ConstructorWithResolvableArguments))
                                                          .WithFuncAndLazyWithoutRegistration()
                                                          .WithTrackingDisposableTransients()
-                                                         .WithoutFastExpressionCompiler()
                                                          .WithFactorySelector(Rules.SelectLastRegisteredFactory());
 
         /// <summary>

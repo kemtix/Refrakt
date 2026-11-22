@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using DryIoc;
 using Refrakt.Ioc.Mocks.Services;
 using Refrakt.Ioc.Tests;
@@ -37,6 +38,23 @@ namespace Refrakt.Ioc.DryIoc.Tests
             Assert.NotNull(func);
 
             Assert.Throws<ContainerException>(() => func());
+        }
+
+        [Fact]
+        public void CollectionOfUnregisteredConcreteTypeIsEmpty()
+        {
+            var container = Setup.CreateContainer();
+            IEnumerable<ServiceA> enumerable = null;
+            var enumerableEx = Record.Exception(() => enumerable = container.Resolve<IEnumerable<ServiceA>>());
+            Assert.Null(enumerableEx);
+            Assert.NotNull(enumerable);
+            Assert.Empty(enumerable);
+
+            ServiceA[] array = null;
+            var arrayEx = Record.Exception(() => array = container.Resolve<ServiceA[]>());
+            Assert.Null(arrayEx);
+            Assert.NotNull(array);
+            Assert.Empty(array);
         }
 
         public class DisposableService : IDisposable

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DryIoc.dll" />
+    <PackageReference Include="DryIoc.dll" ExcludeAssets="build" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />

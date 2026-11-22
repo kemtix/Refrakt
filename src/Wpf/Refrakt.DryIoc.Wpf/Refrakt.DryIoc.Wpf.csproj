@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DryIoc.dll" />
+    <PackageReference Include="DryIoc.dll" ExcludeAssets="build" />
   </ItemGroup>
 
   <ItemGroup>

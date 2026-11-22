@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DryIoc.dll" />
+    <PackageReference Include="DryIoc.dll" ExcludeAssets="build" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
     <PackageReference Include="NSubstitute" />
